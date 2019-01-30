@@ -1,0 +1,41 @@
+<html>
+  <head>
+    <title>Carroll's Mischmasch</title>
+    <link href="mischmasch.css" rel="stylesheet" />
+  </head>
+  <body>
+    <center><h1>Carroll's Mischmasch</h1></center>
+    <div hidden id="loading">Loading...</div>
+    <form>
+      Score: <i id="x">x</i>/<b id="y">y</b>
+      <br/><br/>
+      Nucleus: <b id="nucleus">rea</b>
+      <br />
+      <input type="text" id="answer" /><input type="submit" value="Answer!" />
+      <br />
+      <input id="no-answer" type="button" value="No valid answer" />
+      <input id="give-up" type="button" value="I give up" />
+    </form>
+    
+    <h2>What?</h2>
+    Mischmasch is a word game devised by Lewis Carroll.<br/>
+    Given a part of word (e.g. "rea"), you should find a real/dictionary word that contains it (e.g. "dream").
+    
+    <h2>Notes</h2>
+    <pre>
+    I saw a <i>Ruby On Rails</i> project that implemented this game (link: <a href="https://github.com/use/repo" target="_blank">@user/repo</a>).<br/>
+    I thought I might as well write my own JavaScript version.
+    
+    I tried to employ these ideas:
+    - Idiomatic programming
+    - Non-blocking UI (Using a <i>Worker</i> and stuff I learned while doing my Zero project).
+    - Some basic semantic HTML (e.g. 'header', 'main', and 'footer' tags)
+    - TypeScript (basically JavaScript with types)
+    - TypeScript and VSCode don't suck. How about that!
+    - <s>Caching</s>
+    - <s>Simple CSS animation ('Loading...')</s>
+    </pre>
+
+    <script src="mischmasch.min.js"></script>
+  </body>
+</html>

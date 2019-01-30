@@ -1,0 +1,32 @@
+body {
+  background: yellow;
+}
+
+h1 {
+  text-align: center;
+}
+
+h1, h2 {
+  border-bottom: solid orangered;
+  width: fit-content;
+  padding-bottom: 5px;
+}
+    
+form {
+  background: #e4e40e;
+  padding: 10px;
+}
+
+#loading {
+  background: gold;
+  color: red;
+  padding: 10px;
+  cursor: wait;
+  font-size: x-large;
+  font-weight: bold;
+  text-align: center;
+}
+
+pre {
+  white-space: pre-line;  
+}
