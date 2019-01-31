@@ -11,20 +11,38 @@ h1, h2 {
   width: fit-content;
   padding-bottom: 5px;
 }
-    
+
 form {
   background: #e4e40e;
   padding: 10px;
+  font-size: large;
+}
+
+#message {
+  font-style: italic;
+  border-left: 3px solid orangered;
+  padding-left: 5px;
+}
+
+#score {
+  float: right;
+  background: black;
+  color: yellow;
+  padding: 5px;
+}
+
+@keyframes fading-in-out {
+  50% {color: transparent;}
 }
 
 #loading {
-  background: gold;
-  color: red;
+  color: orangered;
   padding: 10px;
   cursor: wait;
-  font-size: x-large;
+  font-size: xx-large;
   font-weight: bold;
   text-align: center;
+  animation: fading-in-out 2.5s infinite;
 }
 
 pre {
