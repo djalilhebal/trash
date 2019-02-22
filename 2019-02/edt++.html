@@ -1,0 +1,67 @@
+<html>
+  <head>
+    <title>EDT++</title>
+    <meta charset="utf8" />
+    <link href="edt++.css" rel="stylesheet" />
+  </head>
+
+  <body onload="EDTpp.setup();">
+    <header>
+      <h1>EDT++</h1>
+      A filterable 'Emploi Du Temps'<br />
+      <i>This is a WIP maybe...?</i><br />
+      <a href="#legend">Legend</a> - <a href="#about">What?</a> - <a href="#license">License?</a>
+    </header>
+    
+    <main>
+      <input type="text" id="input"
+        placeholder="Filter (e.g. G6.BD.L Sec2.BD)"
+        onchange="EDTpp.update();" />
+      <div id="table">...</div>
+    </main>
+    
+    <footer>
+      <section>
+      <h2 id="legend">Legend</h2>
+      <b>Colors</b> go from darker to lighter signifying the importance of sessions (according to me, at least):
+      <i>Cours > TD > TP</i>
+      
+      <b>@Where</b>
+      A or Amphi: Cours
+      S or Salle: TD
+      L or Lab: TP
+
+      <b>Who</b>
+      G: Groupe
+      Sec: Section
+
+      <b>Modules:</b>
+      BD: Bases de données
+      RC: Réseaux de télécommunication
+      SE: Systèmes d'exploitation 1
+      DAW: Développement d'applications Web
+      GL: Génie logiciel 1
+      TG: Théorie des graphes
+      AJEL: Aspects juridiques et économiques des logiciels
+      </section>
+      
+      <section>
+      <h2 id="about">What?</h2>
+      - The filter basically takes a CSS selector and adds/removes classes from divs to do its job.
+      - In case an invalid filter is provided, it highlights all cells.
+      - `edt.htm` is `EDT_S4_16-2-2019-sansTPBDG5.pdf` as exported by MS Word 2016. When a new schedule is published, only the 'edt.htm' need to be replaced.
+      - It must be run on a server cause it uses `fetch` and it doesn't work on the 'file:' protocol.
+      - Tested using Google Chrome v71. Developed using Notepad++ and lighttpd.
+      - It uses latest JavaScript features like <i>Array.prototype.flatMap</i> so the code probably needs to be transpiled to support relatively older browsers.
+      - Inspired by an interesting script of my friend Wanis.
+      </section>
+      
+      <section>
+      <h2 id="license">License?</h2>
+      WTFPL
+      </section>
+    </footer>
+
+    <script src="EDT++.js"></script>
+  </body>
+</html>

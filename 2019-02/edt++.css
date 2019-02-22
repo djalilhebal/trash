@@ -1,0 +1,61 @@
+* {padding:0; margin:0;}
+
+body {
+  padding: 15px;
+}
+
+header, main {
+  text-align: center;
+}
+
+#input {
+  padding: 5px;
+  margin: 10px;
+  font-size: 20;
+  text-align: center;
+  width: 100%;
+}
+
+#table {
+  min-width: 500px;
+}
+
+.cell {
+  background:gainsboro;
+  opacity: .2;
+  display: inline-block;
+  color: white;
+  width: 75px;
+  height: 75px;
+  padding: 5px;
+  margin: 1px;
+  text-align: center;
+  vertical-align: top;
+}
+
+.cell.empty * { visibility: hidden; }
+
+.cell.wanted { opacity: 1 }
+
+.cell.A {
+  background: #640664;
+}
+
+.cell.S {
+  background: darkmagenta;
+}
+
+.cell.L {
+  background: mediumvioletred;
+}
+
+.what {
+  padding: 12px 0px;
+  font-size: 25px;
+}
+.who, .where { display: inline-block;}
+.where { font-style: italic;}
+
+footer {
+  white-space: pre-line;
+}
