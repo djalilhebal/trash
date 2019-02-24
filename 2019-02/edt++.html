@@ -14,10 +14,16 @@
     </header>
     
     <main>
-      <input type="text" id="input"
-        placeholder="Filter (e.g. G6.BD.L Sec2.BD)"
+      <input
+        type="text"
+        id="input"
+        placeholder="Filter (e.g. section2 G6 G4.Lab)"
         onchange="EDTpp.update();" />
-      <div id="table">...</div>
+        
+        8:30-10 *** 10-11:30 *** 11:30-13 *** 13-14:30 *** 14:30-16
+        <div id="table">
+        Loading...
+        </div>
     </main>
     
     <footer>
@@ -47,13 +53,20 @@
       
       <section>
       <h2 id="about">What?</h2>
-      - The filter basically takes a CSS selector and adds/removes classes from divs to do its job.
-      - In case an invalid filter is provided, it highlights all cells.
-      - `edt.htm` is `EDT_S4_16-2-2019-sansTPBDG5.pdf` as exported by MS Word 2016. When a new schedule is published, only the 'edt.htm' need to be replaced.
-      - It must be run on a server cause it uses `fetch` and it doesn't work on the 'file:' protocol.
+      - In case an invalid input is provided, all cells get highlighted/selected.
+      - The filter function basically takes a CSS selector and adds/removes the 'wanted' class from cells to realize its job.
+      
+      - When a new timetable is published, only the 'edt.htm' needs to be replaced.
+      - The 'edt.htm' file is 'EDT_S4_21-2-2019.pdf' as exported by MS Office Word 2016 ("save as Web Page, Filtered").
+      
+      - It must be hosted on a (local) server since it uses the 'fetch' API which doesn't work on the 'file:' protocol.
       - Tested using Google Chrome v71. Developed using Notepad++ and lighttpd.
       - It uses latest JavaScript features like <i>Array.prototype.flatMap</i> so the code probably needs to be transpiled to support relatively older browsers.
-      - Inspired by an interesting script of my friend Wanis.
+      - Inspired by an interesting script that my friend Wanis wrote, which manipulated an XML file that was exported from a PDF.
+      
+      - Possible improvement: Instead of 'fetch'ing the htm file, allow the user to select it using input type="file".
+      This makes updating the EDT easy and allows this page to be loaded using the 'file' protocol.
+      - Check edt++'s JavaScript source code to see what's missing and needs to be done (mainly adding days' names).
       </section>
       
       <section>

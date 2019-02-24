@@ -1,7 +1,9 @@
 * {padding:0; margin:0;}
 
 body {
-  padding: 15px;
+  margin: 10px;
+  background: black;
+  color: white;
 }
 
 header, main {
@@ -13,20 +15,24 @@ header, main {
   margin: 10px;
   font-size: 20;
   text-align: center;
-  width: 100%;
+  width: -webkit-fill-available;
 }
 
 #table {
-  min-width: 500px;
+  min-width: 455px;
+}
+
+hr {
+  margin: 10px;
 }
 
 .cell {
-  background:gainsboro;
+  background: snow;
   opacity: .2;
   display: inline-block;
   color: white;
   width: 75px;
-  height: 75px;
+  height: 50px;
   padding: 5px;
   margin: 1px;
   text-align: center;
@@ -35,10 +41,10 @@ header, main {
 
 .cell.empty * { visibility: hidden; }
 
-.cell.wanted { opacity: 1 }
+.cell.wanted {opacity: 1;}
 
 .cell.A {
-  background: #640664;
+  background: #500d50;
 }
 
 .cell.S {
@@ -50,12 +56,18 @@ header, main {
 }
 
 .what {
-  padding: 12px 0px;
+  padding: 0px 0px;
   font-size: 25px;
 }
 .who, .where { display: inline-block;}
-.where { font-style: italic;}
+.where {font-style: italic;font-size: 15px;}
 
 footer {
   white-space: pre-line;
+}
+
+section {
+  background: darkgray;
+  color: black;
+  padding: 10px;
 }

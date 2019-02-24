@@ -1,24 +1,30 @@
-// TODOs:
-// function getDay(sessionIndex) {} // getDay(0) === 'Sun.'
-// function getTime(sessionIndex) {} // getDay(0) === '8:30-10:00'
-// function groupByDays(sessions) {} // returns Array<Array<object>>
+//TODO
+// function getJour(sessionIndex) {} // getJour(0) === 'Dim.'
+
+// getNewJour(0) === 'Dim.'
+// getNewJour(1) === ''
+// function getNewJour(sessionIndex) {} 
 
 const EDTpp = {
   $input: document.querySelector('#input'),
   $table: document.querySelector('#table'),
-  sessions: [],
   
-  async /** Promise<void> */ setup() {
+  async /** Promise<object> */ setup() {
+    /// @todo 'try catch'ing errs (Network and matching errors can occur)
     const html = await fetch('edt.htm').then(res => res.text());
-    const [, tableHtml] = html.match(/(<table[\s\S]+<\/table>)/);
-    const $container = document.createElement('div');
-    $container.innerHTML = tableHtml;
-    const $originalTable = $container.querySelector('table');
-    this.sessions = this.parseSessions($originalTable);
-    this.draw();
+    const [, originalTableHtml] = html.match(/(<table[\s\S]+<\/table>)/);
+    const {sessions, jours} = this.parseTable(originalTableHtml);
+    this.sessions = sessions;
+    this.jours = jours;
+    const generatedTable = this.generateTable();
+    this.$table.innerHTML = generatedTable; // draw
+
+    // As Evan Burchard said in his book "Refactoring JavaScript",
+    // always return stuff so you can test/debug them properly.
+    return {sessions, jours, generatedTable};
   },
 
-  /** void */ update() {
+  /** object */ update() {
     const unsetWanted = /** HTMLElement */ $x => $x.classList.remove('wanted');
     const setWanted = /** HTMLElement */ $x => $x.classList.add('wanted');
 
@@ -34,49 +40,84 @@ const EDTpp = {
     }
     $allCells.forEach(unsetWanted);
     $wantedCells.forEach(setWanted);
+    
+    return {input, query, $wantedCells}
   },
   
-  /** void */ draw() {
-    const divs = this.sessions.map((session, i) => {
+  /** string */ generateTable() {
+    const generateCell = (session, i) => {
+      const omitNumber = str => str.replace(/\d/g, ''); // 'S3' > 'S'
+      const getTime = i => '8:30-10 10-11:30 11:30-13 13-14:30 14:30-16'.split(' ')[i%5];
       const {who, what, where} = session;
-      const [_who, _where] = [who, where].map(x => x.replace(/\d/g, ''));
-      const div = `
-      <div class="cell wanted ${who?'':'empty'} ${who} ${what} ${where} ${_who} ${_where}">
+      return `
+      <div
+        title="${getTime(i)}"
+        class="cell wanted ${who?'':'empty'}
+          ${who} ${what} ${where} ${omitNumber(who)} ${omitNumber(where)}"
+        >
         <div class="what">${what}</div>
         <div class="who">${who}</div>
         <div class="where">@${where}</div>
-      </div>`;
-      return (i+1)%5 === 0? div+'<br/>' : div;
+      </div>`
+    }
+    
+    const isRowOver = i => (i+1)%5 === 0;
+    const isDayOver = (i) => {
+      const rowsPerDay = [11, 10, 10, 10, 9]; //TODO shouldn't be hard-coded
+      const finalRows = [11, 21, 31, 41, 50]; //TODO should use 'rowsPerDay'
+      const currentRow = (i+1) / 5;
+      return finalRows.some(row => row === currentRow);
+    }
+    
+    const divs = this.sessions.map((session, i) => {
+      let div = generateCell(session, i);
+      if (isRowOver(i)) div += '<br />';
+      if (isDayOver(i)) div += '<hr />';
+      return div;
     });
 
-    this.$table.innerHTML = divs.join('');
+    return divs.join('');
   },
   
-  /** Array<object> */ parseSessions(/** HTMLElement */ $originalTable) {
+  /** object */ parseTable(/** string */ originalTableHtml) {
     const getCode = $x => $x.innerText.replace(/(\D)0/, '$1').trim(); // 'G06\n\n' > 'G6'
-    
     const CASES = 15; // Each row contains 15 'data' cases
+    
+    // Convert the originalTableHtml string to an actual HTMLElement
+    const $container = document.createElement('div');
+    $container.innerHTML = originalTableHtml;
+    const $originalTable = $container.querySelector('table');
+
     const $trs = $originalTable.querySelectorAll('tr');
+    const jours = [];
     const sessions = Array(...$trs).
       filter($tr => $tr.children.length >= CASES).
-      flatMap(($tr) => {
+      flatMap(($tr, rowIndex) => {
         const $tdsAll = $tr.querySelectorAll('td');
-        const $tds = Array(...$tdsAll).slice(-CASES); // Remove useless cases
-        const sessions = [];
+        Array(...$tdsAll).slice(0, -CASES).forEach($x => $x.title='extra')
+        const $tds = Array(...$tdsAll).slice(-CASES); // Remove 'Jours' col cells
+        
+        if ($tds.length !== $tdsAll.length) {
+          const text = $tdsAll[0].innerText.trim();
+          const firstRowIndex = rowIndex - 2;
+          if (text) jours.push({text, firstRowIndex});
+        }
+
+        const result = [];
         for (let i = 0; i < CASES; i += 3) {
           const [where, who, what] = [$tds[i], $tds[i+1], $tds[i+2]].map(getCode);
-          sessions.push({
+          result.push({
             what,
             where: where.replace('T', 'L'),
             who: who.replace('S', 'SEC'),
           });
         }
-        return sessions;
+        return result;
       });
       
-    return sessions;
+    return {jours, sessions};
   },
-  
+
   /** string */ normalizeQuery(/** string */ str) {
     const synonyms = {
       'MODULE': 'M',
@@ -92,8 +133,8 @@ const EDTpp = {
       replace(/\.+/g, '.').replace(/\.\W/g, ''). // '..A5.' > '.A5.' > '.A5'
       replace(/\s+/g, ' ').trim(). // remove extra whitespace
       replace(/(\D)0/g, '$1'). // so that 'G06' == 'G6'
-      replace(/\b(\w+)\b/g, part => synonyms[part]? synonyms[part]: part).
+      replace(/([A-Z]+)/g, part => synonyms[part]? synonyms[part]: part).
       split(' ').map(x => x.startsWith('.')? x: '.'+x).join(', ');
   },
-
+  
 }
