@@ -2,6 +2,7 @@
   <head>
     <title>EDT++</title>
     <meta charset="utf8" />
+    <meta name="viewport" content="width=500, initial-scale=1" />
     <link href="edt++.css" rel="stylesheet" />
   </head>
 
@@ -9,16 +10,21 @@
     <header>
       <h1>EDT++</h1>
       A filterable 'Emploi Du Temps'<br />
-      <i>This is a WIP maybe...?</i><br />
-      <a href="#legend">Legend</a> - <a href="#about">What?</a> - <a href="#license">License?</a>
+      <i>This is a WIP maybe...?</i>
+      <br />
+      <a href="#legend">Legend/Selectors</a>
+      - <a href="#examples">Examples</a>
+      - <a href="#details">Details</a>
+      - <a href="#license">License?</a>
     </header>
     
     <main>
       <input
         type="text"
         id="input"
-        placeholder="Filter (e.g. section2 G6 G4.Lab)"
+        placeholder="Filter (e.g. section2 G06 g4.tp)"
         onchange="EDTpp.update();" />
+        <br /><br />
         
         8:30-10 *** 10-11:30 *** 11:30-13 *** 13-14:30 *** 14:30-16
         <div id="table">
@@ -28,20 +34,21 @@
     
     <footer>
       <section>
-      <h2 id="legend">Legend</h2>
+      <h2 id="legend">Legend/Selectors</h2>
       <b>Colors</b> go from darker to lighter signifying the importance of sessions (according to me, at least):
       <i>Cours > TD > TP</i>
       
+      
       <b>@Where</b>
-      A or Amphi: Cours
-      S or Salle: TD
-      L or Lab: TP
+      Cours = Amphi = A
+      TD = Salle = S
+      TP = Lab = L
 
       <b>Who</b>
-      G: Groupe
-      Sec: Section
+      Section = Sec
+      Groupe = G
 
-      <b>Modules:</b>
+      <b>Modules</b>
       BD: Bases de données
       RC: Réseaux de télécommunication
       SE: Systèmes d'exploitation 1
@@ -49,24 +56,57 @@
       GL: Génie logiciel 1
       TG: Théorie des graphes
       AJEL: Aspects juridiques et économiques des logiciels
+
+
+      * In case an invalid input is provided, all cells get highlighted/selected.
+      
+      * The filter function basically takes a CSS selector and adds/removes the 'wanted' class from cells and rows to realize its job.
       </section>
       
       <section>
-      <h2 id="about">What?</h2>
-      - In case an invalid input is provided, all cells get highlighted/selected.
-      - The filter function basically takes a CSS selector and adds/removes the 'wanted' class from cells to realize its job.
+      <h2 id="examples">Examples</h2>
+      When does anyone study 'TP SE'?
+      "TP.SE"
       
-      - When a new timetable is published, only the 'edt.htm' needs to be replaced.
-      - The 'edt.htm' file is 'EDT_S4_21-2-2019.pdf' as exported by MS Office Word 2016 ("save as Web Page, Filtered").
+      When does Groupe04 have sessions in labs?
+      "Groupe4.Lab" or simply "G04.L" or just "G4.TP"
       
-      - It must be hosted on a (local) server since it uses the 'fetch' API which doesn't work on the 'file:' protocol.
-      - Tested using Google Chrome v71. Developed using Notepad++ and lighttpd.
-      - It uses latest JavaScript features like <i>Array.prototype.flatMap</i> so the code probably needs to be transpiled to support relatively older browsers.
-      - Inspired by an interesting script that my friend Wanis wrote, which manipulated an XML file that was exported from a PDF.
+      Show all Groupe6 or Section2's sessions!
+      "G6 section2"
       
-      - Possible improvement: Instead of 'fetch'ing the htm file, allow the user to select it using input type="file".
-      This makes updating the EDT easy and allows this page to be loaded using the 'file' protocol.
-      - Check edt++'s JavaScript source code to see what's missing and needs to be done (mainly adding days' names).
+      I'm from G6/SEC2 and wanna see if I can attend 'TP DAW' with other groups.
+      "G6 sec2 DAW.TP"
+      
+      When does any L2 group occupy room#19?
+      "salle19" or "S19" or "TD19"
+
+      When does group#3 study in room#19?
+      "S19.G3"
+      </section>
+      
+      <section>
+      <h2 id="details">Details</h2>
+      * It must be hosted on a (local) server since it uses the <code>fetch</code> API which doesn't work on the 'file:' protocol.
+      * It uses latest JavaScript features like <code>Array.prototype.flatMap</code> so the code probably needs to be transpiled/polyfilled to support relatively older browsers.
+      * Tested using Google Chrome v71.
+      * Developed using Notepad++ and lighttpd.
+      
+      <b>Updating</b>
+      * When a new timetable is published, only the 'edt.htm' needs to be replaced.
+      * The current 'edt.htm' file is 'EDT_S4_21-2-2019.pdf' as exported by MS Office Word 2016 ("save as Web Page, Filtered").
+      
+      <b>Possible improvements</b>
+      * Instead of 'fetch'ing the htm file, allow the user to select it using input type="file".
+      This makes updating the EDT easier and allows this page to be opened using the 'file' protocol.
+      
+      * The CSS <code>:has()</code> pseudo-selector didn't work. My workaround is like meh.
+      Find an alternative to do something like this:
+      <code>.row:not(:has(> .wanted.cell)) {display: none;}</code>
+      
+      <b>Inspiration</b>
+      This script is inspired by a code that my friend Wanis wrote in Python.
+      His code parses an XML file (that was exported from a PDF which our university published) to output a list of students, sorted by their grades.
+
       </section>
       
       <section>

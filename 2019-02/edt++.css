@@ -1,36 +1,35 @@
 * {padding:0; margin:0;}
 
 body {
-  margin: 10px;
-  background: black;
+  background: #020202;
   color: white;
+  margin: 10px;
 }
 
 header, main {
   text-align: center;
 }
 
+a {
+  color: #0cd40c;
+}
+
 #input {
   padding: 5px;
   margin: 10px;
-  font-size: 20;
+  font-size: 20px;
   text-align: center;
   width: -webkit-fill-available;
 }
 
-#table {
+#table { /* Useless? */
   min-width: 455px;
-}
-
-hr {
-  margin: 10px;
 }
 
 .cell {
   background: snow;
-  opacity: .2;
-  display: inline-block;
   color: white;
+  display: inline-block;
   width: 75px;
   height: 50px;
   padding: 5px;
@@ -39,35 +38,43 @@ hr {
   vertical-align: top;
 }
 
-.cell.empty * { visibility: hidden; }
+.cell:not(.wanted) {
+  opacity: 0.09;
+}
 
-.cell.wanted {opacity: 1;}
+.row:not(.wanted) {
+  display: none;
+}
+
+.cell.empty * {
+  visibility: hidden;
+}
 
 .cell.A {
-  background: #500d50;
+  background: #024a02;
 }
 
 .cell.S {
-  background: darkmagenta;
+  background: #009a00;
 }
 
 .cell.L {
-  background: mediumvioletred;
+  background: yellowgreen;
 }
 
 .what {
-  padding: 0px 0px;
   font-size: 25px;
 }
-.who, .where { display: inline-block;}
-.where {font-style: italic;font-size: 15px;}
+.who, .where {
+  font-size: 15px;
+}
 
 footer {
   white-space: pre-line;
 }
 
 section {
-  background: darkgray;
+  background: #9ac343;
   color: black;
   padding: 10px;
 }
