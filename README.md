@@ -1,7 +1,7 @@
 # Trash
-Like a collection of my crappy codes (?)
+Like a collection of my *trashy tries* (?)
 
-`trash` is basically 2019's `shit` which contains the scripts I wrote between 2017-10 and the end of 2018.
+**Trash** is basically 2019's **[Shit][]** (which contains the *shitty scripts* I wrote between 2017-10 and the end of 2018).
 
 ## Done(?)
 - [Carroll's MischMasch.html](https://dreamski21.github.io/trash/2019-01/mischmasch.html) (2019-01)
@@ -12,3 +12,5 @@ Like a collection of my crappy codes (?)
 
 ## License
 WTFPL
+
+[shit]: https://github.com/dreamski21/shit

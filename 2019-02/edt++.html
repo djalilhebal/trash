@@ -1,8 +1,9 @@
+<!DOCTYPE html>
 <html>
   <head>
-    <title>EDT++</title>
+    <title>EDT++: A filterable 'Emploi Du Temps'</title>
     <meta charset="utf8" />
-    <meta name="viewport" content="width=500, initial-scale=1" />
+    <meta name="viewport" content="width=500" />
     <link href="edt++.css" rel="stylesheet" />
   </head>
 
@@ -94,12 +95,13 @@
       <b>Updating</b>
       * When a new timetable is published, only the 'edt.htm' needs to be replaced.
       * The current 'edt.htm' file is 'EDT_S4_21-2-2019.pdf' as exported by MS Office Word 2016 ("save as Web Page, Filtered").
+      * I mean it worked fine on 'EDT_S4_16-2-2019-sansTPBDG5.pdf' and *should* work on others, provided that the table's structure/layout is the same.
       
       <b>Possible improvements</b>
       * Instead of 'fetch'ing the htm file, allow the user to select it using input type="file".
       This makes updating the EDT easier and allows this page to be opened using the 'file' protocol.
       
-      * The CSS <code>:has()</code> pseudo-selector didn't work. My workaround is like meh.
+      * The <code>:has()</code> CSS pseudo-class didn't work. My workaround is like meh.
       Find an alternative to do something like this:
       <code>.row:not(:has(> .wanted.cell)) {display: none;}</code>
       

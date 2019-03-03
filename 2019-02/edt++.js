@@ -139,8 +139,8 @@ const EDTpp = {
       replace(/\.+/g, '.').replace(/\.\W/g, ''). // '..A5.' > '.A5.' > '.A5'
       replace(/\s+/g, ' ').trim(). // remove extra whitespace
       replace(/(\D)0/g, '$1'). // so that 'G06' == 'G6'
-      replace(/([A-Z]+)/g, part => synonyms[part]? synonyms[part]: part).
-      split(' ').map(x => x.startsWith('.')? x : '.' + x).
+      replace(/([A-Z]+)/g, part => synonyms[part] ? synonyms[part] : part).
+      split(' ').map(x => x.startsWith('.') ? x : '.' + x).
       join(', ');
   },
   
