@@ -21,7 +21,7 @@ while $I_have_a_shitty_net; do
   goul "Downloading..."
   links=`cat $links_file | grep "^[^#]"` # Get lines that don't starts with '#'
   for link in $links ; do
-    aria2c "$link" -c
+    aria2c "$link" -c --seed-time=0.0
   done
 
   goul "Sleeping..."
