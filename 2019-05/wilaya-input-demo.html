@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <title>Daffy Darja demo: Wilaya input</title>
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+  <style>
+    * {padding: 0; margin: 0;}
+    body {background: gainsboro;padding: 10px;}
+    h1 {text-align: center;}
+    header, footer {white-space: pre-line;font-family: mono;padding: 10px;}
+    #entry {
+      border: 2px solid red;
+      margin: 10px 50px;
+      border-radius: 10px;
+      text-align: center;
+      color: white;
+      }
+
+    form {margin: 10px;}
+    #input {width: 90%;text-align: center;font-size: 21px;height: 40px;}
+    input[type=submit] {width: 5%;vertical-align: bottom;font-size: 15px;height: 40px;}
+
+    #info {color: gray;text-align: left;}
+    #english {
+      color: white;
+      background: red;
+      padding: 10px;
+      font-size: large;
+      font-weight: bold;
+      border-bottom: 2px dashed;
+    }
+    #english i {font-weight: normal;font-size: medium;}
+    #darjas {}
+    .darja {
+      background: green;
+      text-align: left;
+      margin: 5px 15px;
+      padding: 10px;
+      border-radius: 20px;
+    }
+    .darja .reactions {float: right;padding: 5px;}
+    .darja .reactions button {font-size: 20px}
+    .darja i {font-size: small;}
+    </style>
+</head>
+<body>
+  <h1><a href="https://github.com/dreamski21/daffy-darja">Daffy Darja</a> demo: Wilaya input</h1>
+  <header>
+    <em>Suppose</em> you are Walae, a 20yo from <strong>Constantine</strong>.
+    You were browsing entries in the <strong>Daffy Darja</strong> app and stumbled upon this.
+
+    To add a translation in your dialect, you simply type it and hit enter (or click 'Add').
+    You can also add translations in other dialects by prefixing the text with the corresponding <a href="#code">wilaya's number or abbreviation</a>.
+    For example, <code>21: Faynk?</code> or <code>SK: Faynk?"</code>
+  </header>
+
+  <main>
+    <h2>Fake Entry</h2>
+    <div id="entry">
+      <div id="english">...</div>
+      <form>
+          <input type="text" id="input" placeholder="How do you say it in Darja?" autocomplete="off" /><!--
+          --><input type="submit" value="Add" />
+          <div id="info"></div>
+      </form>
+      <div id="darjas">
+        ...
+      </div>
+    </div>
+  </main>
+
+  <h2>Wilayas</h2>
+  <footer id="code">
+    ...
+  </footer>
+  <script src='wilaya-input-demo.js'></script>
+</body>
+</html>
