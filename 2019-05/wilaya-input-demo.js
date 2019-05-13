@@ -1,40 +1,94 @@
 // See wilaya-input-demo.html (prototyping a part of Daffy Darja)
 
-function main() {
-  const $form = document.querySelector('form');
-  const $input = document.querySelector('#input');
-  const $info = document.querySelector('#info');
-
-  $form.onsubmit = function(){ return false; }
-  $input.oninput = function updateInfo() {
-    const text = $input.value;
-    const {wilayaName, source} = Wilaya.fromTextMaybe(text);
-    $info.innerHTML = `<b>${wilayaName}</b> (${source})`;
+class Wilaya {
+  static initWilayas() {
+    Wilaya.wilayas = Wilaya.rawWilayas.split('\n').map((line) => {
+      const rWilayaLine = /^([0-9]{2}) ([A-Z]{2}) (.+)/;
+      const [, num, code, name] = line.match(rWilayaLine);
+      return { num, code, name };
+    })
   }
-  $input.oninput(); // initial "info"
 
-  const $english = document.querySelector('#english');
-  const $darjas = document.querySelector('#darjas');
-  $english.innerHTML = `
-    "${ data.sentence.english }"<br>
-    <i>${ data.sentence.tags.map(tag=> '#' + tag).join(' ') }</i>`;
-  $darjas.innerHTML = data.sentence.darjas.map((darja) => {
-    return `
-      <div class="darja">
-        "${darja.text}"
-        <span class="reactions"><button>😂</button><button>😐</button><button>😑</button></span>
-        <br><i>${ Wilaya.fromCode(darja.wilayaCode) } (added by ${darja.username})</i>
-      </div>`
-  }).join('');
+  /**
+   * @param {string} str - Wilaya's number or code (abbr)
+   * @returns {string} Wilaya's name
+   */
+  static fromCode(str) {
+    for (const wilaya of Wilaya.wilayas) {
+      if (wilaya.code === str || wilaya.num === str) {
+        return wilaya.name;
+      }
+    }
+    return 'BAD INPUT >:(';
+  }
+
+  /**
+   * @param {string} str - Inputted text
+   * @returns {object} Wilaya's name and the source of this info
+   */
+  static fromTextMaybe(str) {
+    const rCode = /^([0-9]{2}|[A-Z]{2}):/;
+    const [, code] = str.match(rCode) || [];
+    const wilayaName = Wilaya.fromCode( code ? code : data.currentUser.wilayaNum);
+    const source = code ? `Code: ${code}` : 'Your wilaya';
+    return { wilayaName, source };
+  }
   
-  const $footer = document.querySelector('footer');
-  $footer.innerHTML = rawWilayas;
-
 }
+
+// Adapted from http://www.statoids.com/udz.html
+Wilaya.rawWilayas =
+`02 CH Chlef
+03 LG Laghouat
+05 BT Batna
+06 BJ Béjaïa
+07 BS Biskra
+09 BL Blida
+11 TM Tamanrasset
+12 TB Tébessa
+13 TL Tlemcen
+14 TR Tiaret
+15 TZ Tizi Ouzou
+16 AL Alger
+17 DJ Djelfa
+18 JJ Jijel
+19 SF Sétif
+21 SK Skikda
+22 SB Sidi Bel Abbès
+23 AN Annaba
+24 GL Guelma
+25 CO Constantine
+27 MG Mostaganem
+28 MS Msila
+31 OR Oran
+33 IL Illizi
+34 BB Bordj Bou Arréridj
+35 BM Boumerdès
+36 TA El Tarf
+37 TN Tindouf
+38 TS Tissemsilt
+40 KH Khenchela
+41 SA Souk Ahras
+42 TP Tipaza
+43 ML Mila
+44 AD Aïn Defla
+45 NA Naama
+46 AT Aïn Témouchent
+47 GR Ghardaïa
+48 RE Relizane
+01 AR Adrar
+04 OB Oum El Bouaghi
+08 BC Béchar
+10 BU Bouira
+20 SD Saïda
+26 MD Médéa
+29 MC Mascara
+30 OG Ouargla
+32 EB El Bayadh
+39 EO El Oued`
 
 // FAKE DATA
 const data = {
-
   currentUser: {
     birthYear: 1999, // age = 20
     wilayaNum: '25',
@@ -61,85 +115,45 @@ const data = {
 
 }
 
-class Wilaya {
-  static fromCode(str) {
-    for (const wilaya of Wilaya.wilayas) {
-      if (wilaya.code === str || wilaya.num === str) {
-        return wilaya.name;
-      }
-    }
-    return 'BAD INPUT >:('
+function main() {
+  Wilaya.initWilayas();
+
+  const $form = document.querySelector('form');
+  $form.onsubmit = function addTranslation(){
+    // ...
+    return false;
   }
 
-  /**
-   * @param {string} str - Inputted text
-   * @returns {object} Wilaya's name and the source of this info
-   */
-  static fromTextMaybe(str) {
-    const rCode = /^([0-9]{2}|[A-Z]{2}):/;
-    const [, code] = str.match(rCode) || [];
-    const wilayaName = Wilaya.fromCode( code ? code : data.currentUser.wilayaNum);
-    const source = code ? `Code: ${code}` : 'Your wilaya';
-    return { wilayaName, source }
+  const $input = document.querySelector('#input');
+  const $info = document.querySelector('#info');
+  $input.oninput = function updateInfo() {
+    const text = $input.value;
+    const {wilayaName, source} = Wilaya.fromTextMaybe(text);
+    $info.innerHTML = `<b>${wilayaName}</b> (${source})`;
   }
+  $input.oninput(); // initial "info"
+
+  const $english = document.querySelector('#english');
+  $english.innerHTML = `
+    "${ data.sentence.english }"<br>
+    <i>${ data.sentence.tags.map(tag => '#' + tag).join(' ') }</i>`;
+
+  const $darjas = document.querySelector('#darjas');
+  $darjas.innerHTML = data.sentence.darjas.map((darja) => {
+    return `
+      <div class="darja">
+        <span class="text">${darja.text}</span>
+        <span class="reactions"><button>😂</button><button>😐</button><button>😑</button></span>
+        <br>
+        <span class="info">
+          <span class="wilaya">${Wilaya.fromCode(darja.wilayaCode)}</span>
+          (added by ${darja.username})
+        </span>
+      </div>`
+  }).join('');
   
+  const $code = document.querySelector('#code pre');
+  $code.innerHTML = Wilaya.rawWilayas;
 }
-
-// Adapted from http://www.statoids.com/udz.html
-const rawWilayas =
-`05 BT Batna
-09 BL Blida
-12 TB Tébessa
-15 TZ Tizi Ouzou
-16 AL Alger
-18 JJ Jijel
-19 SF Sétif
-21 SK Skikda
-23 AN Annaba
-24 GL Guelma
-25 CO Constantine
-31 OR Oran
-36 TA El Tarf
-41 SA Souk Ahras
-01 AR Adrar
-44 AD Aïn Defla
-46 AT Aïn Témouchent
-08 BC Béchar
-06 BJ Béjaïa
-07 BS Biskra
-34 BB Bordj Bou Arréridj
-10 BU Bouira
-35 BM Boumerdès
-02 CH Chlef
-17 DJ Djelfa
-32 EB El Bayadh
-39 EO El Oued
-47 GR Ghardaïa
-33 IL Illizi
-40 KH Khenchela
-03 LG Laghouat
-29 MC Mascara
-26 MD Médéa
-43 ML Mila
-27 MG Mostaganem
-28 MS Msila
-45 NA Naama
-30 OG Ouargla
-04 OB Oum el Bouaghi
-48 RE Relizane
-20 SD Saïda
-22 SB Sidi Bel Abbès
-11 TM Tamanrasset
-14 TR Tiaret
-37 TN Tindouf
-42 TP Tipaza
-38 TS Tissemsilt
-13 TL Tlemcen`
-
-Wilaya.wilayas = rawWilayas.split('\n').map((line) => {
-  const rWilayaLine = /^([0-9]{2}) ([A-Z]{2}) (.+)/;
-  const [, num, code, name] = line.match(rWilayaLine);
-  return { num, code, name };
-});
 
 main();
