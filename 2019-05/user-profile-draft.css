@@ -1,0 +1,54 @@
+* {padding: 0; margin: 0;}
+body {background: gainsboro;padding: 10px;}
+a {text-decoration: none;}
+h1 {text-align: center;}
+header, footer {
+  white-space: pre-line;
+  font-family: mono;
+  padding: 10px;
+}
+
+#profile {text-align: center;background: white;padding: 10px;}
+#profile .username {font-size: large;font-weight: bold;}
+#profile .label {color: gray;}
+#profile form {
+  text-align: left;
+  margin: 5px 20px;
+  border: 2px dashed gray;
+  padding: 6px;
+}
+
+#profile input[name=wilayaCode] {
+  width: 50px;
+  text-align: center;
+  font-size: 17px;
+}
+
+#profile input[name=birthYear] {
+  width: 100px;
+  text-align: center;
+  font-size: 17px;
+}
+
+label {
+  background: black;
+  color: white;
+  vertical-align: top;
+  padding: 3px;
+  border-radius: 5px;
+  font-family: mono;
+}
+label * {vertical-align: text-bottom;margin: 0px 5px;}
+
+.formatted {
+  color: gray;
+  font-style: italic;
+}
+
+section {background: white;margin: 20px;padding: 5px;}
+
+.mini-entry {margin: 5px;color: white;}
+.mini-darja, .mini-english {padding: 5px;}
+.mini-english {background: red;}
+.mini-darja {background: green;}
+.mini-darja b {background: white;color: green;border-radius: 50%;padding: 2px;margin-right: 3px;}

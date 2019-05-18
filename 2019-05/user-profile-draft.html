@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <title>Daffy Darja draft: User profile</title>
+  <meta name='viewport' content='width=500px, initial-scale=1'>
+  <link href="user-profile-draft.css" rel="stylesheet">
+</head>
+<body>
+  <h1><a href="https://github.com/dreamski21/daffy-darja">Daffy Darja</a> draft: User profile</h1>
+  <header>
+    <em>Suppose</em> you signed up as @Warrior, 20yo, student, and from Constantine. Now you wanna update your info.
+
+    <b>NOTES</b>
+    - You can't change your username because I'm gonna use it to make permalinks (using random IDs is meh).
+    - Notice how the same button is enable only when the info has "actually" changed. Like wow. I'm so smart (and totally copying Atom editor~)
+    - Why put the label 'User'? Because there will be Editors or Moderators or Admins or whatever.
+    - Other users' profiles will more or less look like this.
+
+    <b>TODOs</b>
+    - These are the properties we are most interested in.
+    They are filled when signing up. Too much? Should make some optional (and let the user add them in this page)?
+
+    - What "disclaimer" or "contract" should I use? Maybe something like:
+    <strong>By signing up, you're releasing your generated data and public profile info
+    to the public domain (or as CC0 or whatever Algerian laws permit).</strong>
+
+    - Check that the person's age allows them to sign up. In the US it is 13, but what about Algeria?
+    Is it the same as "the minimum age to sign a contract" (15+ or 16+ maybe)?
+  </header>
+
+  <main id="profile">
+    <span class="username">@Warrior</span><br>
+    <span class="label">User</span><br>
+    <span>#7 with 531 😂s</span><br>
+    <br>
+    <form id="update-info" action="#">
+      <div>Wilaya's code: <input type="text" name="wilayaCode"
+        pattern="[0-9]{2}|[A-Z]{2}" placeholder="e.g. 21 or SK" value="25" />
+      <span class="formatted">({Wilaya's name} see <a href="./wilaya-input-demo.html">wilaya-input-demo</a>)</span>
+      </div><br>
+      
+      <div>Gender:
+        <label><input type="radio" name="gender" value="male" checked>Male</label>
+        <label><input type="radio" name="gender" value="female">Female</label>
+      </div><br>
+
+      <div>Birth year: <input type="number" name="birthYear" value="1999" />
+      <span class="formatted">(20yo)</span>
+      </div><br>
+
+      <div>Education level:
+        <label><input type="radio" name="education" value="unstated">Not stated</label>
+        <label><input type="radio" name="education" value="middle">Middle school</label>
+        <label><input type="radio" name="education" value="secondary">Secondary school</label>
+        <label><input type="radio" name="education" value="college" checked>College</label>
+      </div><br>
+
+      <div>Languages: <input name="languages" type="text"
+        placeholder="e.g. fr, jp; or Arabic, Spanish" value="ar, en, fr, jp" />
+      <span class="formatted">(Arabic, English, French, and Japanese)</span>
+      </div><br>
+
+      <br>
+      <input type="submit" value="Save changes" disabled />
+    </form>
+
+    <form id="change-password" action="#">
+      <fieldset disabled="disabled">
+          <legend>Change password</legend>
+          Current: <input name="oldPassword" type="password" placeholder="current password"/><br>
+          <br>
+          New: <input name="newPassword" type="password" placeholder="new password" />
+          <input name="newPassword2" type="password" placeholder="new password (again)" /><br>
+          <input type="submit" value="Change password" disabled />    
+      </fieldset>
+    </form>
+  </main>
+
+  <section>
+    <h2>Your recent translations</h2>
+    <div class="mini-entry">
+      <div class="mini-english">I sorta use Instagram just to watch vids and to pass time.</div>
+      <div class="mini-darja"><b>25</b>kchghoul mdayer linsta bah nchouf l vid ou bah n3ageb lwe9t berk</div>
+    </div>
+    <div class="mini-entry">
+      <div class="mini-english">I know.</div>
+      <div class="mini-darja"><b>25</b>3ambali</div>
+    </div>
+    <div class="mini-entry">
+      <div class="mini-english">I didn't ask for your opinion.</div>
+      <div class="mini-darja"><b>25</b>matlbtch rayek</div>
+    </div>
+    </section>
+  <script src="user-profile-draft.js"></script>
+</body>
+</html>
