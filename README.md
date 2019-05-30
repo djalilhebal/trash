@@ -12,6 +12,8 @@ Like a collection of my *trashy tries*(?)
 
 - `repo-ripper.sh` (2019-03): A script that downloads/updates repos from GitHub using *wget* and *git*.
 
+- Daffy Darja [`wilaya-input-draft.html`](https://dreamski21.github.io/trash/2019-05/wilaya-input-draft.html) and [`user-profile-draft.html`](https://dreamski21.github.io/trash/2019-05/wilaya-input-draft.html) (2019-05)
+
 ## Ideas expressed in code
 - `Romyo.rb` (2019-03): AI/chatbot that communicates in Darja but thinks in English. A *Daffy Darja* use-case.
 

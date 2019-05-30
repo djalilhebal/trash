@@ -1,4 +1,4 @@
-// See wilaya-input-demo.html (prototyping a part of Daffy Darja)
+// See wilaya-input-draft.html
 
 class Wilaya {
   static initWilayas() {
@@ -38,12 +38,16 @@ class Wilaya {
 
 // Adapted from http://www.statoids.com/udz.html
 Wilaya.rawWilayas =
-`02 CH Chlef
+`01 AR Adrar
+02 CH Chlef
 03 LG Laghouat
+04 OB Oum El Bouaghi
 05 BT Batna
 06 BJ Béjaïa
 07 BS Biskra
+08 BC Béchar
 09 BL Blida
+10 BU Bouira
 11 TM Tamanrasset
 12 TB Tébessa
 13 TL Tlemcen
@@ -53,20 +57,26 @@ Wilaya.rawWilayas =
 17 DJ Djelfa
 18 JJ Jijel
 19 SF Sétif
+20 SD Saïda
 21 SK Skikda
 22 SB Sidi Bel Abbès
 23 AN Annaba
 24 GL Guelma
 25 CO Constantine
+26 MD Médéa
 27 MG Mostaganem
 28 MS Msila
+29 MC Mascara
+30 OG Ouargla
 31 OR Oran
+32 BA El Bayadh
 33 IL Illizi
 34 BB Bordj Bou Arréridj
 35 BM Boumerdès
 36 TA El Tarf
 37 TN Tindouf
 38 TS Tissemsilt
+39 OU El Oued
 40 KH Khenchela
 41 SA Souk Ahras
 42 TP Tipaza
@@ -75,17 +85,7 @@ Wilaya.rawWilayas =
 45 NA Naama
 46 AT Aïn Témouchent
 47 GR Ghardaïa
-48 RE Relizane
-01 AR Adrar
-04 OB Oum El Bouaghi
-08 BC Béchar
-10 BU Bouira
-20 SD Saïda
-26 MD Médéa
-29 MC Mascara
-30 OG Ouargla
-32 EB El Bayadh
-39 EO El Oued`
+48 RE Relizane`
 
 // FAKE DATA
 const data = {

@@ -4,27 +4,79 @@
   <meta charset='utf-8'>
   <title>Daffy Darja draft: User profile</title>
   <meta name='viewport' content='width=500px, initial-scale=1'>
-  <link href="user-profile-draft.css" rel="stylesheet">
+  <style>
+  * {padding: 0; margin: 0;}
+  body {background: gainsboro;padding: 10px;}
+  a {text-decoration: none;}
+  h1 {text-align: center;}
+  section {background: white;margin: 20px;padding: 5px;}
+  header, footer {
+    white-space: pre-line;
+    font-family: mono;
+    padding: 10px;
+  }
+
+  #profile {text-align: center;background: white;padding: 10px;}
+  #profile .username {font-size: large;font-weight: bold;}
+  #profile .label {color: gray;}
+  #profile form {
+    text-align: left;
+    margin: 5px 20px;
+    border: 2px dashed gray;
+    padding: 6px;
+  }
+
+  #profile input[name=wilayaCode] {
+    width: 50px;
+    text-align: center;
+    font-size: 17px;
+  }
+
+  #profile input[name=birthYear] {
+    width: 100px;
+    text-align: center;
+    font-size: 17px;
+  }
+
+  label {
+    background: black;
+    color: white;
+    vertical-align: top;
+    padding: 3px;
+    border-radius: 5px;
+    font-family: mono;
+  }
+  label * {vertical-align: text-bottom;margin: 0px 5px;}
+
+  .formatted {
+    color: gray;
+    font-style: italic;
+  }
+
+  .mini-entry {margin: 5px;color: white;}
+  .mini-darja, .mini-english {padding: 5px;}
+  .mini-english {background: red;}
+  .mini-darja {background: green;}
+  .mini-darja b {background: white;color: green;border-radius: 50%;padding: 2px;margin-right: 3px;}
+  </style>
 </head>
 <body>
   <h1><a href="https://github.com/dreamski21/daffy-darja">Daffy Darja</a> draft: User profile</h1>
   <header>
-    <em>Suppose</em> you signed up as @Warrior, 20yo, student, and from Constantine. Now you wanna update your info.
+    <em>Suppose</em> you have signed up as @Warrior: 20yo, student, and from Constantine. Now you wanna update your info.
 
     <b>NOTES</b>
     - You can't change your username because I'm gonna use it to make permalinks (using random IDs is meh).
-    - Notice how the same button is enable only when the info has "actually" changed. Like wow. I'm so smart (and totally copying Atom editor~)
+    - Notice how the same button is enable only when the info has "actually" changed. Like, wow. I'm so smart (and totally copying Atom editor~)
     - Why put the label 'User'? Because there will be Editors or Moderators or Admins or whatever.
     - Other users' profiles will more or less look like this.
 
     <b>TODOs</b>
     - These are the properties we are most interested in.
     They are filled when signing up. Too much? Should make some optional (and let the user add them in this page)?
-
     - What "disclaimer" or "contract" should I use? Maybe something like:
     <strong>By signing up, you're releasing your generated data and public profile info
     to the public domain (or as CC0 or whatever Algerian laws permit).</strong>
-
     - Check that the person's age allows them to sign up. In the US it is 13, but what about Algeria?
     Is it the same as "the minimum age to sign a contract" (15+ or 16+ maybe)?
   </header>
@@ -37,7 +89,7 @@
     <form id="update-info" action="#">
       <div>Wilaya's code: <input type="text" name="wilayaCode"
         pattern="[0-9]{2}|[A-Z]{2}" placeholder="e.g. 21 or SK" value="25" />
-      <span class="formatted">({Wilaya's name} see <a href="./wilaya-input-demo.html">wilaya-input-demo</a>)</span>
+        <span class="formatted">({Wilaya's name} see <a href="./wilaya-input-draft.html">wilaya-input-draft</a>)</span>
       </div><br>
       
       <div>Gender:
@@ -45,8 +97,9 @@
         <label><input type="radio" name="gender" value="female">Female</label>
       </div><br>
 
-      <div>Birth year: <input type="number" name="birthYear" value="1999" />
-      <span class="formatted">(20yo)</span>
+      <div>
+        Birth year: <input type="number" name="birthYear" value="1999" />
+        <span class="formatted">(20yo)</span>
       </div><br>
 
       <div>Education level:
@@ -56,9 +109,9 @@
         <label><input type="radio" name="education" value="college" checked>College</label>
       </div><br>
 
-      <div>Languages: <input name="languages" type="text"
-        placeholder="e.g. fr, jp; or Arabic, Spanish" value="ar, en, fr, jp" />
-      <span class="formatted">(Arabic, English, French, and Japanese)</span>
+      <div>Languages:
+        <input name="languages" placeholder="e.g. fr, jp, Spanish" value="ar, en, fr, jp" />
+        <span class="formatted">(Arabic, English, French, Japanese)</span>
       </div><br>
 
       <br>
