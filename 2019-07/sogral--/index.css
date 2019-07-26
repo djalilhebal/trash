@@ -1,0 +1,58 @@
+* {
+  padding: 0;
+  margin: 0;
+  text-decoration: none;
+}
+
+body {
+  text-align: center;
+  background: greenyellow;
+  margin: 5px;
+}
+
+header, footer {
+  padding: 5px;
+  background: yellowgreen;
+  font-family: mono;
+  margin-bottom: 10px;
+}
+
+header p {
+  font-style: italic;
+}
+
+form {
+  background: black;
+  color: white;
+  border-radius: 15px 15px 0 0;
+  padding: 10px;
+}
+
+form select {
+  width: 150px;
+  color: black;
+  text-align: center;
+}
+
+#output {
+  display: block;
+  border-radius: 0 0 10px 10px;
+  border: 2px dashed black;
+  border-top: 0;
+  margin-bottom: 10px;
+  padding: 5px;
+}
+
+
+.voyage {
+  background: white;
+}
+
+.voyage .heure {
+  font-weight: bold;
+}
+
+.voyage .extra {
+  font-size: small;
+  color: gray;
+}
