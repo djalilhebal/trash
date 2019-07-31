@@ -1,87 +1,62 @@
 //@ts-check
-
-/**
- * Front-end stuff
- * 
- * @todo Make it actually work!!
- * @todo Browserify it!
- */
-
-/*
-SogralData {
-    date: string
-    departs: Array<{
-        code: string
-        name: string
-        dests: Array<{
-            code: string
-            name: string
-            voyages: Array<{
-                heure: string
-                prix: string
-                ligne: string
-                transporteur: string
-                destination: string // The same as dest.name? Delete it?
-            }>
-        }>
-    }>
-}
-
-DenormalizedVoyage {
-  departName: string
-  departCode: string
-
-  destName: string
-  destCode: string
-
-  heure: string
-  prix: string
-  ligne: string
-  transporteur: string
-}
-
-*/
-
+"use strict"
 const R = require('ramda');
+const sogralData = require('./sogral-data.json');
 
-const replace = ($target, $element) => $target.replaceWith($element);
-const replaceContent = ($elem, content) => $elem.innerHTML = content;
-const value = R.partial(R.prop, 'value');
+// replaceContent :: HTMLElement -> String -> ()
+const replaceContent = R.curry( ($elem, content) => $elem.innerHTML = content );
 
-function generateSelect(name, options) {
-  return `<select name="${name}" id="${name}">` + 
-    options.map(option => `<option value="${option.code}">${option.name}</option>`).join('') +
-  '</select>';
-}
+// sel :: String -> HTMLElement -> HTMLElement
+const sel = R.curry( (query, $parent) => $parent.querySelector(query) );
+
+// on :: HTMLElement -> String -> Function -> ()
+const on = R.curry ( ($el, ev, fn) => $el.addEventListener(ev, fn) );
+
+// numVal :: HTMLInputElement -> Number
+const numVal = R.compose( Number, R.prop('value') );
+
+// generateOptions :: Array Object -> String
+const generateOptions = R.pipe( R.map(x => `<option value="${x.code}">${x.name}</option>`), R.join('') );
 
 function updateDeparts($doc, data) {
-  const departs = data;
-  replace($doc.querySelector('#depart'), generateSelect('depart', departs));
+  replaceContent(
+    sel('#depart', $doc),
+    generateOptions( data.departs )
+  )
 }
 
 function updateDests($doc, data) {
-  const newDests = data[ value($doc.querySelector('#depart')) ];
-  replace($doc.querySelector('#dest'), generateSelect('dest', newDests));
+  const depart = numVal( sel('#depart', $doc) );
+  replaceContent(
+    sel('#dest', $doc),
+    generateOptions( data.departs.find(d => d.code == depart).dests )
+  )
 }
 
-// voyages :: (object, string, string) -> Array object
-function voyages(data, departCode, destCode) {
-  return data.departs
-    .find(depart => depart.code === departCode)
-    .find(dest => dest.code === destCode);
-}
+// voyages :: Object -> Number -> Number -> Array Object
+const voyages = R.curry( (data, departCode, destCode) => {
+  try {
+    return data
+      .departs
+      .find(depart => depart.code === departCode)
+      .dests
+      .find(dest => dest.code === destCode)
+      .voyages;
+  } catch(e) {
+    return [];
+  }
+});
 
-function generateLine({heure, prix, transporteur, ligne, destination}) {
-  return `
-    <div class="voyage">
-      <span class="heure">${heure}</span>
-      -
-      <span class="prix">${prix}</span>
-      <span class="extra">- T: ${transporteur} - L: ${ligne} - D: ${destination}</span>
-    </div>`;
-}
+// generateLine :: Object -> String
+const generateLine = ({heure, prix, ligne, transporteur}) => `
+  <div class="voyage">
+    <span class="heure">${heure}</span>
+    <span class="prix">${prix} DA</span>
+    <span class="extra"><b>L:</b> ${ligne}</span>
+    <span class="extra"><b>T:</b> ${transporteur}</span>
+  </div>`;
 
-// generateOutput :: Array object -> string
+// generateOutput :: Array Object -> String
 function generateOutput(voyages) {
   if (voyages.length === 0) {
     return 'Pas de donées ou pas de voyages.'
@@ -91,26 +66,31 @@ function generateOutput(voyages) {
 }
 
 function updateOutput($doc, data) {
-  const replaceOutput = R.partial(replaceContent, $doc.querySelector('#output'));
+  const replaceOutput = replaceContent( sel('#output', $doc) );
+  const [depart, dest] = R.map( R.compose(numVal, sel(R.__, $doc)), ['#depart', '#dest'] );
 
   R.pipe(
-    R.always(['#depart', '#dest']),
-    R.map(R.compose(value, $doc.querySelector)),
-    R.apply(R.partial(voyages, data)),
+    () => voyages(data, depart, dest),
+    R.tap(console.info),
     generateOutput,
     replaceOutput,
   )();
 }
 
-function setup($doc, data) {
-  const on = ($el, ev, fn) => $el.addEventListener(ev, fn);
-  on($doc.querySelector('form [name="de"]'), 'change', () => updateDests($doc, data));
-  on($doc.querySelector('form'), 'change', () => updateOutput($doc, data));
-  updateDeparts($doc, data);
-}
+(function setup($doc, data) {
+  
+  on(
+    sel('#depart', $doc),
+    'change',
+    (_event) => updateDests($doc, data)
+  );
 
-// const sogralData = require('sogral-data.json'));
-/* or */
-fetch('sogral-data.json')
-  .then(res => res.json())
-  .then(sogralData => setup(document, sogralData));
+  on(
+    sel('form', $doc),
+    'change',
+    (_event) => updateOutput($doc, data)
+  );
+
+  updateDeparts($doc, data);
+
+})(document, sogralData);

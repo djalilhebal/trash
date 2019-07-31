@@ -8,6 +8,8 @@ body {
   text-align: center;
   background: greenyellow;
   margin: 5px;
+  font-size: 17px;
+  font-family: sans;
 }
 
 header, footer {
@@ -29,7 +31,7 @@ form {
 }
 
 form select {
-  width: 150px;
+  width: 200px;
   color: black;
   text-align: center;
 }
@@ -43,9 +45,16 @@ form select {
   padding: 5px;
 }
 
-
 .voyage {
   background: white;
+  margin-bottom: 2px;
+  padding: 5px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.voyage * {
+  width: 25%;
 }
 
 .voyage .heure {
@@ -55,4 +64,5 @@ form select {
 .voyage .extra {
   font-size: small;
   color: gray;
+  text-align: left;
 }

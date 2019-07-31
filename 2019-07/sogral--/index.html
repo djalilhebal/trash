@@ -9,37 +9,27 @@
 <body>
   <header>
     <h1>Sogral--</h1>
-    <p>Une version moins déplaisante de
+    <p>Une version moins déplaisante de "l'application"
       <a href="https://www.sogral.dz/app_sogral/app/fr.php" target="_blank" rel="noreferrer">
-        "app sogral"
+        de Sogral.
       </a>
       <br>
-      Dynamique, fonctionne sans connexion, #brouillon, 2019-07-10
+      Dynamique, fonctionne hors ligne, #brouillon, 2019-07
     </p>
   </header>
   <main>
     <form>
-      De <select name="de">
-        <option value="12">ANNABA</option>
-      </select>
-      Vers <select name="vers">
-        <option value="13">EL EULMA</option>
-      </select>
+      <label>De <select name="depart" id="depart"></select></label>
+      <label>Vers <select name="dest" id="dest"></select></label>
     </form>
-    <noscript>Javascript est demandé</noscript>
+    <noscript>JavaScript est requis pour lancer cette application</noscript>
     <output id="output">
-      Selecter une gare et une destination~
-      <div class="voyage">
-        <span class="heure">07:00</span>
-        -
-        <span class="prix">490 DA</span>
-        <span class="extra">- T: BADJI KHALED - L: ALGER/AZZABA - D: EL EULMA</span>
-      </div>
+      Sélectionner le départ et la destination~
     </output>
   </main>
   <footer>
     Djalil Dreamski / WTFPL / Code disponible <a href="https://github.com/dreamski21/trash" target="_blank">sur GitHub</a>
   </footer>
-  <script src="index.js"></script>
+  <script src="index.min.js"></script>
 </body>
 </html>

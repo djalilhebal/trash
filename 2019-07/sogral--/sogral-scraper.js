@@ -1,27 +1,44 @@
 //@ts-check
 /**
- * @file Scrap Sogral
+ * @file Sogral Scraper
+ *
+ * - Tried to refactor this thing after reading @getify/Functional-Light-JS
+ * - Maybe use these packages: functional-promises, axios-retry, sqlite3
  * 
- * Maybe use modules: jsdom, sqlite3, axios, functional-promises
- * 
- * @todo Convert `prix` and `code` to numbers to save space!
  * @todo Use an async promises lib to do Promise.map/series!
- * @todo denormalizeData :: Data -> Array DenormalizedVoyage
- * @todo Export data as a denormalized sqlite database?
- */
+ * @todo denormalizeData :: Data -> Array DenormalizedVoyage? Easier to work with?
+ * @todo Export denormalized data to an sqlite database for my friends to practice BD?
+*/
+/*
+ DenormalizedVoyage {
+  departName: string
+  departCode: string
+
+  destName: string
+  destCode: string
+
+  heure: string
+  prix: string
+  ligne: string
+  transporteur: string
+}
+*/
 
 const fs = require('fs').promises;
 const R = require('ramda');
-const axios = require('axios');
+const axios = require('axios').default;
 const {JSDOM} = require('jsdom');
 const sleep = require('sleep-promise');
 
-// domify :: string -> Document
+// domify :: String -> Document
 const domify = html => (new JSDOM(html)).window.document;
 
-// getter :: () -> (string -> Promise string)
-const getter = () => {
-  //@ts-ignore
+// TODO: just import it from index.js?
+// sel :: String -> HTMLElement -> HTMLElement
+const sel = R.curry( (query, $parent) => $parent.querySelector(query) );
+
+// getPage :: String -> Promise String
+const getPage = (function pageGetter() {
   const instance = axios.create({
     baseURL: 'https://www.sogral.dz/app_sogral/app/',
     headers: {
@@ -29,23 +46,36 @@ const getter = () => {
     }
   });
   return (subpath) => instance.get(subpath).then(res => res.data);
-}
-const getPage = getter();
+})();
 
-// extractDeparts :: Document -> Array object
-function extractDeparts($doc) {
-  const extractInfo = $option => ({code: $option.value, name: $option.textContent.trim()});
-  const $depart = $doc.querySelector('#depart');
-  const results = Array.from($depart.children).map(extractInfo).filter(d => d.code !== '0');
-  return results;
-}
 
-// fetchDeparts :: () -> Array object
-const fetchDeparts = R.pipeP(R.always(Promise.resolve('fr.php')), getPage, domify, extractDeparts);
+// toDepartObj :: HTMLOptionElement -> Object
+const toDepartObj = $option => ( {code: $option.value, name: $option.textContent} );
 
-// parseDests :: string -> Array object
+// hasCodeZero :: Object -> Boolean
+const hasCodeZero = R.compose( R.equals('0'), R.prop('code') );
+
+// TODO: Re-test this function!
+// extractDeparts :: Document -> Array Object
+const extractDeparts = R.pipe(
+  sel('#depart'),
+  R.prop('children'),
+  Array.from,
+  R.map(toDepartObj),
+  R.reject(hasCodeZero)
+  );
+
+// fetchDeparts :: () -> Array Object
+const fetchDeparts = R.pipeP(
+  R.always(Promise.resolve('fr.php')),
+  getPage,
+  domify,
+  extractDeparts
+  );
+
+// TODO: use domify(..)!
+// parseDests :: String -> Array Object
 function parseDests(html) {
-  // TODO: use domify!
   return html
   .split('\n')
   .map((line) => {
@@ -53,7 +83,7 @@ function parseDests(html) {
     const matched = line.match(rOption);
     if (matched) {
       let [, code, name] = matched;
-      return {code, name: name.trim()};
+      return {code, name};
     } else {
       return undefined;
     }
@@ -61,7 +91,7 @@ function parseDests(html) {
   .filter(Boolean);
 }
 
-// fetchDests :: Array object -> Array object
+// fetchDests :: Array Object -> Array Object
 async function fetchDests(departs) {
   departs = R.clone(departs);
   for (const depart of departs) {
@@ -71,53 +101,124 @@ async function fetchDests(departs) {
   return departs;
 }
 
-// parseVoyages :: string -> Array object
+// TODO: use domify!
+// TODO: maybe remove the 'destination' field
+// parseVoyages :: String -> Array Object
 function parseVoyages(html) {
-  // TODO: use domify!
   const voyages_trs = html.match(/<tr>[\s\S]+?<\/tr>/g);
   const voyages =
   voyages_trs.map((voyage_tr, _i) => {
-    let transporteur, transporteurMatch = voyage_tr.match(/<span.*>(.+)\<\/span>/);
-    if (transporteurMatch)
-      transporteur = transporteurMatch[1].trim();
+    const transporteurMatch = voyage_tr.match(/<span.*>(.+)\<\/span>/);
+    const transporteur = transporteurMatch ? transporteurMatch[1] : undefined;
     const voyage_tds = voyage_tr.match(/<td >(.+?)<\/td>/g) || [];
     const [ligne, destination, prix, heure] = voyage_tds.map(td => td.slice(5, -5).trim());
-    return { ligne, destination, transporteur, prix, heure };
+    return { heure, prix, ligne, transporteur, destination };
   })
-  .filter(v => !!v.destination);
+  .filter(v => !!v.heure);
   return voyages;
 }
 
-// fetchVoyages :: Array object -> Array object
+// fetchVoyages :: Array Object -> Array Object
 async function fetchVoyages(departs) {
   departs = R.clone(departs);
   for (const depart of departs) {
     for (const dest of depart.dests) {
-      try {
-        dest.voyages =
-          await R.pipeP(getPage, parseVoyages)
-          (`fr.php?depart=${depart.code}&destinations=${dest.code}`);
-        await sleep(Math.random() * 60*1000); // To prevent error code 508
-        console.log(depart.name, '->', dest); // TODO: remove!
-      } catch(e) {
-        console.log(`\nERR: ${depart.code}->${dest.code}\n`);
+      if (typeof dest.voyages === 'undefined') {
+        try {
+          dest.voyages =
+            await R.pipeP(getPage, parseVoyages)(`fr.php?depart=${depart.code}&destinations=${dest.code}`);
+        } catch(e) {
+          // TODO: Handle network errors! Use the 'axios-retry' package maybe.
+          // Currently voyages will be undefined so that a subsequent call to
+          // this function will try to fix it.
+        } finally {
+          // To prevent error code 508 (Resource Limit Is Reached)
+          await sleep(Math.random() * 60*1000);
+        }
       }
     }
   }
   return departs;
 }
 
-async function scrap() {
-  const fetchData = R.pipeP(fetchDeparts, fetchDests, fetchVoyages);
-  const jsonify = obj => JSON.stringify(obj, null, 2);
-  // TODO make it point-free! Neither R.unary(..) nor partial/partialRight worked...
-  const write = data => fs.writeFile('data-sogral.json', data, 'utf8');
+// Convert everything to the format "SOMETHING / SOMETHING ELSE"
+// formatPlace :: String -> String
+const formatPlace = R.compose(R.toUpper, R.trim, R.replace(/\s*\/\s*/, ' / '));
 
-  R.pipeP(
-    fetchData,
-    jsonify,
-    write
-  )();
+// formatPrice :: String -> Number
+const formatPrice = R.unary( R.partialRight(Number.parseInt, [10]) );
+
+/*
+SogralData {
+    date: string
+    departs: Array<{
+        code: number
+        name: string
+        dests: Array<{
+            code: number
+            name: string
+            voyages: Array<{
+                heure: string
+                prix: string
+                ligne: string
+                transporteur: string
+            }>
+        }>
+    }>
+}
+*/
+// tidyData :: Object -> Object
+function tidyData(data) {
+  const trans = {
+    date: R.identity,
+    departs: R.map(R.evolve({
+      code: Number,
+      name: formatPlace,
+      dests: R.map(R.evolve({
+        code: Number,
+        name: formatPlace,
+        voyages: R.map(R.pipe(
+          R.dissoc('destination'),
+          R.evolve({
+            heure: R.identity,
+            prix: formatPrice,
+            ligne: R.trim,
+            transporteur: R.trim,
+          })
+        ))
+      }))
+    }))
+  }
+  return R.evolve(trans, data);
 }
 
-scrap();
+// MAYBE: Rename fetchData to fetchDeparts, and fetchDeparts to fetchBareDeparts
+const fetchData = R.pipeP(fetchDeparts, fetchDests, fetchVoyages);
+
+const jsonify = R.curryN(3, JSON.stringify)(R.__, null, 2);
+
+const write = R.curryN(3, fs.writeFile)(R.__, R.__, 'utf8');
+
+const getDate = () => (new Date).toJSON();
+
+// TODO: Use R.assoc(..) maybe
+const wrapData = (destsArr) => ( {date: getDate(), dests: destsArr} );
+
+const scrap = R.pipeP(
+  fetchData,
+  wrapData,
+  tidyData,
+  jsonify,
+  write('sogral-data.json')
+  );
+
+//@ts-ignore
+if (require.main === module) {
+  scrap();
+} else {
+  // for testing
+  module.exports = {
+    formatPlace,
+    formatPrice,
+  }
+}
