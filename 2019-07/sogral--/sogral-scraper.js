@@ -3,37 +3,20 @@
  * @file Sogral Scraper
  *
  * - Tried to refactor this thing after reading @getify/Functional-Light-JS
- * - Maybe use these packages: functional-promises, axios-retry, sqlite3
- * 
- * @todo Use an async promises lib to do Promise.map/series!
- * @todo denormalizeData :: Data -> Array DenormalizedVoyage? Easier to work with?
- * @todo Export denormalized data to an sqlite database for my friends to practice BD?
-*/
-/*
- DenormalizedVoyage {
-  departName: string
-  departCode: string
-
-  destName: string
-  destCode: string
-
-  heure: string
-  prix: string
-  ligne: string
-  transporteur: string
-}
+ * - This script (as well as index.js) is messy and doesn't truly comply with the FP paradigm
+ * - Maybe use an async promises lib to do Promise.map/series: functional-promises?
 */
 
 const fs = require('fs').promises;
 const R = require('ramda');
 const axios = require('axios').default;
+const axiosRetry = require('axios-retry');
 const {JSDOM} = require('jsdom');
 const sleep = require('sleep-promise');
 
 // domify :: String -> Document
 const domify = html => (new JSDOM(html)).window.document;
 
-// TODO: just import it from index.js?
 // sel :: String -> HTMLElement -> HTMLElement
 const sel = R.curry( (query, $parent) => $parent.querySelector(query) );
 
@@ -45,6 +28,17 @@ const getPage = (function pageGetter() {
       'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0'
     }
   });
+
+  //@ts-ignore
+  axiosRetry(instance, {
+    retries: 3,
+    retryDelay: function exponentialDelay(retryNumber = 0) {
+      const seconds = Math.pow(2, retryNumber) * 30*1000;
+      const randomMs = Math.random() * 1000; // ms: [0; 1000[
+      return seconds + randomMs;
+    }
+  });
+
   return (subpath) => instance.get(subpath).then(res => res.data);
 })();
 
@@ -55,7 +49,7 @@ const toDepartObj = $option => ( {code: $option.value, name: $option.textContent
 // hasCodeZero :: Object -> Boolean
 const hasCodeZero = R.compose( R.equals('0'), R.prop('code') );
 
-// TODO: Re-test this function!
+/* TODO: Re-test this function! */
 // extractDeparts :: Document -> Array Object
 const extractDeparts = R.pipe(
   sel('#depart'),
@@ -63,7 +57,7 @@ const extractDeparts = R.pipe(
   Array.from,
   R.map(toDepartObj),
   R.reject(hasCodeZero)
-  );
+);
 
 // fetchDeparts :: () -> Array Object
 const fetchDeparts = R.pipeP(
@@ -71,9 +65,9 @@ const fetchDeparts = R.pipeP(
   getPage,
   domify,
   extractDeparts
-  );
+);
 
-// TODO: use domify(..)!
+/* TODO: use domify(..)! */
 // parseDests :: String -> Array Object
 function parseDests(html) {
   return html
@@ -101,8 +95,8 @@ async function fetchDests(departs) {
   return departs;
 }
 
-// TODO: use domify!
-// TODO: maybe remove the 'destination' field
+/* TODO: use domify! */
+/* TODO: maybe remove the 'destination' field */
 // parseVoyages :: String -> Array Object
 function parseVoyages(html) {
   const voyages_trs = html.match(/<tr>[\s\S]+?<\/tr>/g);
@@ -118,6 +112,12 @@ function parseVoyages(html) {
   return voyages;
 }
 
+/*
+- XXX: How should I handle network errors?
+- The 'axios-retry' package is used (in pageGetter) to retry failed requests.
+- If the above doesn't work, 'voyages' attributes will be 'undefined' so that a
+  subsequent call to this function will try to fix them.
+*/
 // fetchVoyages :: Array Object -> Array Object
 async function fetchVoyages(departs) {
   departs = R.clone(departs);
@@ -128,12 +128,10 @@ async function fetchVoyages(departs) {
           dest.voyages =
             await R.pipeP(getPage, parseVoyages)(`fr.php?depart=${depart.code}&destinations=${dest.code}`);
         } catch(e) {
-          // TODO: Handle network errors! Use the 'axios-retry' package maybe.
-          // Currently voyages will be undefined so that a subsequent call to
-          // this function will try to fix it.
+          dest.voyages = undefined;
         } finally {
           // To prevent error code 508 (Resource Limit Is Reached)
-          await sleep(Math.random() * 60*1000);
+          await sleep(Math.random() * 30*1000);
         }
       }
     }
@@ -141,7 +139,7 @@ async function fetchVoyages(departs) {
   return departs;
 }
 
-// Convert everything to the format "SOMETHING / SOMETHING ELSE"
+/* Convert everything to the format "SOMETHING / SOMETHING ELSE" */
 // formatPlace :: String -> String
 const formatPlace = R.compose(R.toUpper, R.trim, R.replace(/\s*\/\s*/, ' / '));
 
@@ -149,15 +147,15 @@ const formatPlace = R.compose(R.toUpper, R.trim, R.replace(/\s*\/\s*/, ' / '));
 const formatPrice = R.unary( R.partialRight(Number.parseInt, [10]) );
 
 /*
-SogralData {
-    date: string
+interface SogralData {
+    date: string,
     departs: Array<{
         code: number
         name: string
         dests: Array<{
             code: number
             name: string
-            voyages: Array<{
+            voyages: Array<{ // sorted by 'heure'
                 heure: string
                 prix: string
                 ligne: string
@@ -177,44 +175,100 @@ function tidyData(data) {
       dests: R.map(R.evolve({
         code: Number,
         name: formatPlace,
-        voyages: R.map(R.pipe(
-          R.dissoc('destination'),
-          R.evolve({
-            heure: R.identity,
-            prix: formatPrice,
-            ligne: R.trim,
-            transporteur: R.trim,
-          })
-        ))
+        voyages: R.compose(
+            R.sortBy(R.prop('heure')),
+            R.map(R.pipe(
+              R.dissoc('destination'),
+              R.evolve({
+                heure: R.identity,
+                prix: formatPrice,
+                ligne: R.trim,
+                transporteur: R.trim,
+              })
+            ))
+          )
       }))
     }))
   }
   return R.evolve(trans, data);
 }
 
-// MAYBE: Rename fetchData to fetchDeparts, and fetchDeparts to fetchBareDeparts
+/*
+interface DenormalizedVoyage {
+  departName: string
+  departCode: number
+
+  destName: string
+  destCode: number
+
+  heure: string
+  prix: string
+  ligne: string
+  transporteur: string
+}
+*/
+// denormalizeData :: Object -> Array Object
+function denormalizeData(sogralData) {
+  return R.flatten(
+    sogralData.departs.map((depart) => {
+      return depart.dests.map((dest) => {
+        return dest.voyages.map((voyage) => {
+          return {
+            departName: depart.name,
+            departCode: depart.code,
+
+            destName: dest.name,
+            destCode: dest.code,
+
+            heure: voyage.heure,
+            prix: voyage.prix,
+            ligne: voyage.ligne,
+            transporteur: voyage.transporteur
+          }
+        })
+      })
+    })
+  );
+}
+
+/* SIDE EFFECT! */
+// fetchData :: () -> Object
 const fetchData = R.pipeP(fetchDeparts, fetchDests, fetchVoyages);
 
+// jsonift :: Object -> String
 const jsonify = R.curryN(3, JSON.stringify)(R.__, null, 2);
 
-const write = R.curryN(3, fs.writeFile)(R.__, R.__, 'utf8');
+/* SIDE EFFECT! */
+// readText :: String -> String
+const readText = R.curryN(2, fs.readFile)(R.__, 'utf8');
 
-const getDate = () => (new Date).toJSON();
+/* SIDE EFFECT! */
+// writeText :: (String, String) -> ()
+const writeText = R.curryN(3, fs.writeFile)(R.__, R.__, 'utf8');
 
-// TODO: Use R.assoc(..) maybe
-const wrapData = (destsArr) => ( {date: getDate(), dests: destsArr} );
+/* IMPURE! */
+// getDateStr :: () -> String
+const getDateStr = () => (new Date).toJSON();
+
+/* TODO: Use R.assoc(..) maybe? */
+// wrapData :: Array Object -> Object
+const wrapData = (departsArr) => ( {date: getDateStr(), dests: departsArr} );
 
 const scrap = R.pipeP(
   fetchData,
   wrapData,
   tidyData,
   jsonify,
-  write('sogral-data.json')
+  writeText('sogral-data-new.json')
   );
 
 //@ts-ignore
 if (require.main === module) {
   scrap();
+/*  R.pipeP(
+    readText, JSON.parse, tidyData, jsonify, writeText('tidied.json')
+  )('sogral-data.json')
+*/
 } else {
   // for testing
   module.exports = {

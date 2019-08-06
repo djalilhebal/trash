@@ -8,38 +8,63 @@ body {
   text-align: center;
   background: greenyellow;
   margin: 5px;
-  font-size: 17px;
+  font-size: 16px;
   font-family: sans;
 }
 
 header, footer {
+  background: #80cc0b;
   padding: 5px;
-  background: yellowgreen;
+  margin: 10px 0;
   font-family: mono;
-  margin-bottom: 10px;
 }
 
-header p {
-  font-style: italic;
+hr {
+  color: greenyellow;
 }
+
+/*** MAIN/INPUT ***/
 
 form {
   background: black;
   color: white;
   border-radius: 15px 15px 0 0;
   padding: 10px;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  align-content: baseline;
+}
+
+form label {
+  margin: 3px;
 }
 
 form select {
-  width: 200px;
+  width: 275px;
   color: black;
   text-align: center;
 }
 
+/*** OUTPUT ***/
+
+table {
+  width: 100%;
+  border-spacing: 0 2px;
+  border-collapse: separate;
+}
+
+thead {
+  color: white;
+  background: black;
+}
+
+th {
+  padding: 5px;
+}
+
+/* tbody */
 #output {
-  display: block;
-  border-radius: 0 0 10px 10px;
-  border: 2px dashed black;
   border-top: 0;
   margin-bottom: 10px;
   padding: 5px;
@@ -47,22 +72,22 @@ form select {
 
 .voyage {
   background: white;
-  margin-bottom: 2px;
+}
+
+.voyage > * {
   padding: 5px;
-  display: flex;
-  justify-content: space-around;
 }
 
-.voyage * {
-  width: 25%;
+.prix {
+  color: black;
 }
 
-.voyage .heure {
+.heure {
   font-weight: bold;
+  color: green;
 }
 
-.voyage .extra {
-  font-size: small;
+.ligne, .transporteur {
   color: gray;
-  text-align: left;
+  font-size: small;
 }

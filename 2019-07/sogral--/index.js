@@ -15,6 +15,34 @@ const on = R.curry ( ($el, ev, fn) => $el.addEventListener(ev, fn) );
 // numVal :: HTMLInputElement -> Number
 const numVal = R.compose( Number, R.prop('value') );
 
+// NOTE: Why not json? To be url safe maybe... Just encodeUrl(json)?
+function saveState($doc, depart, dest) {
+  const searchObj = new URLSearchParams();
+  searchObj.set('depart', depart);
+  searchObj.set('dest', dest);
+  const hashStr = searchObj.toString();
+  $doc.location.hash = hashStr;
+  return hashStr;
+}
+
+function loadState($doc, data) {
+  const hashStr = $doc.location.hash.slice(1);
+  const searchObj = new URLSearchParams(hashStr);
+  const state = {
+    depart: searchObj.get('depart'),
+    dest: searchObj.get('dest'),
+  }
+
+  if (state.depart && state.dest) {
+    sel('#depart', $doc).value = state.depart;
+    updateDests($doc, data);
+    sel('#dest', $doc).value = state.dest;
+    updateOutput($doc, data);
+  }
+
+  return state;
+}
+
 // generateOptions :: Array Object -> String
 const generateOptions = R.pipe( R.map(x => `<option value="${x.code}">${x.name}</option>`), R.join('') );
 
@@ -33,7 +61,7 @@ function updateDests($doc, data) {
   )
 }
 
-// voyages :: Object -> Number -> Number -> Array Object
+// voyages :: (Object, Number, Number) -> Array Object
 const voyages = R.curry( (data, departCode, destCode) => {
   try {
     return data
@@ -49,12 +77,12 @@ const voyages = R.curry( (data, departCode, destCode) => {
 
 // generateLine :: Object -> String
 const generateLine = ({heure, prix, ligne, transporteur}) => `
-  <div class="voyage">
-    <span class="heure">${heure}</span>
-    <span class="prix">${prix} DA</span>
-    <span class="extra"><b>L:</b> ${ligne}</span>
-    <span class="extra"><b>T:</b> ${transporteur}</span>
-  </div>`;
+  <tr class="voyage">
+    <td class="heure">${heure}</td>
+    <td class="prix">${prix} DA</td>
+    <td class="ligne">${ligne}</td>
+    <td class="transporteur">${transporteur}</td>
+  </tr>`;
 
 // generateOutput :: Array Object -> String
 function generateOutput(voyages) {
@@ -69,12 +97,14 @@ function updateOutput($doc, data) {
   const replaceOutput = replaceContent( sel('#output', $doc) );
   const [depart, dest] = R.map( R.compose(numVal, sel(R.__, $doc)), ['#depart', '#dest'] );
 
+  saveState($doc, depart, dest);
+
   R.pipe(
-    () => voyages(data, depart, dest),
-    R.tap(console.info),
+    voyages,
+    //R.tap(console.info),
     generateOutput,
     replaceOutput,
-  )();
+  )(data, depart, dest);  
 }
 
 (function setup($doc, data) {
@@ -92,5 +122,7 @@ function updateOutput($doc, data) {
   );
 
   updateDeparts($doc, data);
+
+  loadState($doc, data);
 
 })(document, sogralData);

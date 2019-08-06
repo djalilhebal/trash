@@ -14,14 +14,14 @@ Like a collection of my *trashy tries*(?)
 
 - Daffy Darja [`wilaya-input-draft.html`](https://dreamski21.github.io/trash/2019-05/wilaya-input-draft.html) and [`user-profile-draft.html`](https://dreamski21.github.io/trash/2019-05/wilaya-input-draft.html) (2019-05)
 
-- Sogral-- (2019-07) *#timetable #scraper #FP #Ramda*
+- [Sogral--](https://dreamski21.github.io/trash/2019-07/sogral--/index.html) (2019-07) *#timetable #scraper #FP #Ramda*
 
 ## Ideas expressed in code
 - `Romyo.rb` (2019-03): AI/chatbot that communicates in Darja but thinks in English. A *Daffy Darja* use-case.
 
 - `Masmo.js` (2019-04): Web-based, 16-bit MASM IDE.
 
-- `doxer--tech-spec.rst` (2019-06) Upload it?
+- `doxer--tech-spec.rst` (2019-06) Upload it? Rewrite it in LaTeX?
 
 ## License
 WTFPL
