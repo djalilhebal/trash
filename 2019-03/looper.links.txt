@@ -1,9 +1,6 @@
-## Your links goes here.
-## A "link" can be, for example, a URI, torrent file, or magnet.
+## Your links go here.
+## A "link" can be, for example, a URL, a torrent file, or a Magnet URI.
 ## Check aria2c --help for valid inputs.
-
-# A bad example:
 
 # Ruby for biologists
 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2722653/pdf/1471-2105-10-221.pdf
-

@@ -265,10 +265,11 @@ const scrap = R.pipeP(
 //@ts-ignore
 if (require.main === module) {
   scrap();
-/*  R.pipeP(
-    readText, JSON.parse, tidyData, jsonify, writeText('tidied.json')
-  )('sogral-data.json')
-*/
+  /*
+  R.pipeP(
+    readText, JSON.parse, tidyData, denormalizeData, jsonify, writeText('sogral-voyages.json')
+  )('sogral-data.json');
+  */
 } else {
   // for testing
   module.exports = {

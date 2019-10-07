@@ -1,7 +1,7 @@
 # Trash
 Like a collection of my *trashy tries*(?)
 
-**Trash** is basically 2019's [**Shit**](https://github.com/dreamski21/shit) (which contains the *shitty scripts* I wrote between 2017-10 and the end of 2018).
+**Trash** is basically 2019's [**Shit**](https://github.com/dreamski21/shit) which contains the *shitty scripts* I wrote between 2017-10 and the end of 2018.
 
 ## Done(?)
 - [Carroll's MischMasch.html](https://dreamski21.github.io/trash/2019-01/mischmasch.html) (2019-01): Prototype of a word game.
@@ -14,14 +14,18 @@ Like a collection of my *trashy tries*(?)
 
 - Daffy Darja [`wilaya-input-draft.html`](https://dreamski21.github.io/trash/2019-05/wilaya-input-draft.html) and [`user-profile-draft.html`](https://dreamski21.github.io/trash/2019-05/wilaya-input-draft.html) (2019-05)
 
-- [Sogral--](https://dreamski21.github.io/trash/2019-07/sogral--/index.html) (2019-07) *#timetable #scraper #FP #Ramda*
+- [Sogral--](https://dreamski21.github.io/trash/2019-07/sogral--/index.html#depart=12&dest=18) (2019-07) *#timetable #scraper #FP #Ramda*
+
+- `power-panic.sh` (2019-08): A one-liner that makes the laptop sleep when disconnected from the power supply.
 
 ## Ideas expressed in code
 - `Romyo.rb` (2019-03): AI/chatbot that communicates in Darja but thinks in English. A *Daffy Darja* use-case.
 
 - `Masmo.js` (2019-04): Web-based, 16-bit MASM IDE.
 
-- `doxer--tech-spec.rst` (2019-06) Upload it? Rewrite it in LaTeX?
+- `skill-dollhouse.py` (2019-06): A Skill for @MycroftAI to control USBKill via voice commands.
+
+- `doxer--tech-spec-v0.rst` (2019-06): A (draft) tech spec for Shallow Doxer.
 
 ## License
 WTFPL
