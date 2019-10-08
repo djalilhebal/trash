@@ -4,24 +4,24 @@
 Problem & Idea
 ==============
 My friends Light and Kokichi described to me the process by which they buy stuff online:
-0) Find some junk you wanna buy
-1) Contact a dealer on Facebook or by phone to agree on the purchase
-2) Pay via CCP
-3) Inform the dealer and maybe provide proof (like a photo of the receipt or idk)
-4) Finally, the dealer fulfills your request
+1) Find some junk you wanna buy
+2) Contact a dealer on Facebook or by phone to agree on the purchase
+3) Pay via CCP
+4) Inform the dealer and maybe provide proof (like a photo of the receipt or idk)
+5) Finally, the dealer fulfills your request.
 
-1) to 3) can and should be automated to get rid of the tedious and unnecessary human interactions... XD
+Steps 2) to 5) can and should be automated to get rid of the tedious and unnecessary human interactions... XD
 
 Though there seems to be no straightforward way to accomplish this, we can still use what's available
-to implement a general purpose, automated, CCP-based, e-payment platform/app.
+to implement a general purpose, CCP-based, e-payment platform/app.
 "The impossible is possible, all you gotta do is make it so!" -- Kaito Momota.
 
-What's available anyway? When your CCP account get credited, you receive an SMS notification that
+What's available anyway? When your CCP account gets credited, you receive an SMS notification that
 contains the exact amount of the transaction.
-We can use use this 'exact amount' as a key in our key-value 'Requests' database.
-When we receive the key (i.e. payment), we know whom it belongs to, and we carry out the request.
+We can use this 'exact amount' as a key in our key-value 'Requests' database.
+When we receive the key (i.e. payment), we know whom it belongs to, and we carry out the order.
 
-The app must have a reactive user interface (think Meteor) so they can know the status of their requests.
+The app must have a reactive user interface (think Meteor) so that users can know the status of their requests.
 
 Aaaand life's good.
 
@@ -29,7 +29,7 @@ Example
 =======
 - I want to buy Danganronpa (https://store.steampowered.com/app/413410/Danganronpa_Trigger_Happy_Havoc)
 - originalAmount = 19.99 USD
-- convertedAmount = 19.99 * 200 = 3998 -> 4000 DZD (see below)
+- convertedAmount = 19.99 * 200 = 3998 = 4000 DZD (see below)
 - exactAmount = 4001 or 4002 or ... 4099 (the last two digits are like an ID)
 - The request is confirmed by sending an SMS (from within the app) that contains the 'request id'
 - You forward EXACTLY the 'exactAmount' via CCP to DEALER_ACCOUNT
@@ -42,8 +42,19 @@ Notes
 
 - Up to 99 request of the same amount can be pending at any given time.
 Not enough? Shut up!
-Maybe you we can make requests expire after one day, three days, or a week or whatever.
+Maybe you can make requests expire after one day, two days, or whatever suits your business.
 And, if necessary, ban uncommitted users and spammers' phone numbers.
+
+- It's an unfair system! Why do I have to pay for more just because I came in late?
+That's a valid point.
+Just saying: In the worst case scenario, you'll be paying an extra 198 DZD because of how
+this system works (501 -> 600 -> 699).
+So maybe instead of rounding up, I should just round *down* or to the nearest hundred?
+
+- What happens to those extra dinars?
+  - Think of them as processing fees.
+  - They are used for maintenance/development of the platform.
+  - Will be used to for charity or to support open source projects on transparent, Patreon-like websites.
 
 - ASSUMPTION: You can specify dinar unites when sending money via CCP.
 
@@ -55,6 +66,7 @@ And, if necessary, ban uncommitted users and spammers' phone numbers.
 interface AsocialRequest {
   id: string,
   url: string,
+  details: any, // e.g. Steam user to send the game to.
   exactAmount: number,
 
   mobile: string, // that was used to confirm the request
@@ -62,44 +74,45 @@ interface AsocialRequest {
   paid: boolean,
 
   // for logging purposes maybe
-  paymentMessage: object,
+  creationDate: Date, // the date this request was created (via POST)
   confirmationMessage: object,
+  paymentMessage: object,
 }
 
 const pending = new Map<number, AsocialRequest>();
 
 class AsocialCustomer {
 
-  createRequest(url) {
+  createRequest() {
+    const {url, details} = getInputs(); // from a graphical Amazon/Fiverr-like UI
     const originalAmount = getOriginalAmount(url);
     const convertedAmount = roundUp(toDinar(originalAmount));
     const exactAmount = addCode(convertedAmount);
-    const req = registerRequest({url, exactAmount});
+    const req = registerRequest({url, details, exactAmount});
     confirmRequest(req);
   }
 
-  registerRequest(request) {
+  registerRequest(request: AsocialRequest) {
     const requestID = await post(DEALER_SERVER, request);
     return { ...request, id: requestID }
   }
 
-  confirmRequest(request) {
+  confirmRequest(request: AsocialRequest) {
     sendSMS(DEALER_NUMBER, `Confirm request ${request.id}`);
   }
 
-  toDinar(x) {
-    const DOLLAR = 200; // say DEALER charges 200 DZD for 1 USD (Why? How? DK.)
+  toDinar(x: number) {
+    const DOLLAR = 200; // say DEALER charges 200 DZD for 1 USD
     return x * DOLLAR;
   }
 
   // To free up the last two digits which are then used to identify payments of "equal" amounts
-  // The added units are used for maintenance/development or to support open source projects or idk
-  roundUp(x) {
+  roundUp(x: number) {
     return Math.ceil(x / 100) * 100;
   }
 
   // code 00 is reserved for only-Chihiro-knows-why
-  addCode(amount) {
+  addCode(amount: number) {
     for (let code = 01; code <= 99; code++) {
       const fullcode = amount + code;
       if (isFreeSlot(fullcode)) {
@@ -113,7 +126,7 @@ class AsocialCustomer {
 
 class AsocialDealer {
 
-  onSMS(message) {
+  onSMS(message: object) {
     if (message.sender === CCP_SERVICE) {
       handlePayment(message);
     } else {
@@ -121,25 +134,32 @@ class AsocialDealer {
     }
   }
 
-  handlePayment(message) {
+  handleConfirmation(message: object) {
+    const {id} = parse(message.text); // "Confirm request <ID>"
+    const r = pending.get(id);
+    r.confirmationMessage = message;
+    r.mobile = message.sender;
+    r.confirmed = true;
+  }
+
+  handlePayment(message: object) {
     const {amount} = parse(message.text); // "... crédité <AMOUNT> ..."
     if (pending.has(amount)) {
       const r = pending.get(amount);
       r.paymentMessage = message;
       r.paid = true;
       automaticallyFulfillRequest(r) || promptDealerToManuallyFulfillRequest(r);
-      // moveToArchive(r) // to free the slot
+      archiveRequest(r); // to free the slot
     }
   }
 
-  handleConfirmation(message) {
-    const {id} = parse(message.text); // "Confirm request <ID>"
-    if (pending.has(id)) {
-      const r = pending.get(id);
-      r.confirmationMessage = message;
-      r.mobile = message.sender;
-      r.confirmed = true;
-    }
+  // An example of an automated 'fulfilment' using a fictional (or is it?) SteamStore API
+  // DISCLAIMER: I've never bought anything from Steam before
+  fulfillSteam(r: AsocialRequest) {
+    const {url, details} = r;
+    const steam = new SteamStore(DEALER_CREDENTIALS);
+    const game = steam.buyAsGift(url);
+    game.giftTo(details.targetUser);
   }
 
 }
