@@ -1,0 +1,91 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background: whitesmoke;
+}
+
+.vcard {
+  background: black;
+  color: white;
+  padding: 1mm;
+  font-size: 13.5px;
+  width: 90mm;
+  height: 50mm;
+  margin: auto;
+  margin-top: 10%;
+}
+
+.vcard .fn, .vcard .nickname {
+  display: none;
+}
+
+.vcard .n {
+  font-size: 14.75px;
+  font-weight: bold;
+}
+
+.vcard .additional-name::before {
+  content: "“";
+}
+.vcard .additional-name::after {
+  content: "”";
+}
+
+.vcard img.photo {
+  width: 145px;
+  height: 145px;
+  float: right;
+  border-radius: 50%;
+  border-left: 3px solid darkred;
+  background: darkred;
+}
+
+.vcard .sns, .vcard .website, .vcard .email {
+  text-decoration: none;
+  color: red;
+  background: white;
+  padding: 2px;
+  font-family: monospace;
+  border-radius: 7px;
+  font-size: 13px;
+}
+
+.vcard .tags {
+  margin-top: 40px;
+  margin-bottom: 5px;
+}
+.vcard .tags .category {
+  color: red;
+}
+
+.vcard .title {
+  font-weight: bold;
+}
+.vcard .org {
+  /* font-size: small; */
+}
+
+.vcard .adr {
+  font-weight: bold;
+}
+
+.vcard .sns-icons {
+  font-size: 0px;
+  vertical-align: bottom;
+  margin-right: 0px;
+  margin-left: 3px;
+}
+.vcard .sns-icons img {
+  width: 16px;
+  height: 16px;
+  margin-right: 1px;
+}
+
+section.notes {
+    white-space: pre;
+    font-family: monospace;
+    margin: 10px;
+}
