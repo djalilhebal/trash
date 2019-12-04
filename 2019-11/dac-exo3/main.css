@@ -1,0 +1,74 @@
+* {
+  padding: 0;
+  margin: 0;
+  font-family: monospace;
+  font-size: 20px
+}
+
+body {
+  margin: 10px;
+}
+
+header {
+  margin: 10px;
+}
+
+h1 {
+  font-size: 30px;
+  text-align: center;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 18px;
+  color: gray;
+}
+
+main {
+  text-align: center;
+  border: 2px dashed black;
+  margin: 10px;
+}
+
+#T, #p-list {
+  display: inline-block;
+  height: 200px;
+  vertical-align: middle;
+  padding: 10px;
+}
+
+#T {
+}
+
+#T th, #T td {
+  background: gainsboro;
+  padding: 10px;
+}
+
+#p-list {
+  line-height: 60px;
+  margin-right: 50px;
+}
+
+#p-list .p {
+    border: 2px solid black;
+    border-radius: 50%;
+    padding: 5px;
+}
+
+#info {
+  background: black;
+  color: white;
+  padding: 10px;
+}
+
+section {
+  white-space: pre-line;
+  font-size: 17px;
+  padding: 20px;
+  background: gainsboro;
+}
+
+section * {
+  font-size: 17px;
+}
