@@ -14,18 +14,24 @@ Like a collection of my *trashy tries*(?)
 
 - Daffy Darja [`wilaya-input-draft.html`](https://dreamski21.github.io/trash/2019-05/wilaya-input-draft.html) and [`user-profile-draft.html`](https://dreamski21.github.io/trash/2019-05/wilaya-input-draft.html) (2019-05)
 
-- [Sogral--](https://dreamski21.github.io/trash/2019-07/sogral--/index.html#depart=12&dest=18) (2019-07) *#timetable #scraper #FP #Ramda*
+- [Sogral--](https://dreamski21.github.io/trash/2019-07/sogral--/index.html#depart=12&dest=18) (2019-07): A scraper and bus timetables for Sogral-managed voyages(?) _#Ramda #FP_
 
 - `power-panic.sh` (2019-08): A one-liner that makes the laptop sleep when disconnected from the power supply.
+
+- [`hCard/my-card.html`](https://dreamski21.github.io/trash/2019-11/hCard/my-card.html) (2019-11): My trashy "business card", written in the *hCard* microformat. _#SemanticWeb_
+
+- [DAC Exo3](https://dreamski21.github.io/trash/2019-11/dac-exo3/?scenario=p1,p2,p3) (2019-11): #viz #semaphore
 
 ## Ideas expressed in code
 - `Romyo.rb` (2019-03): AI/chatbot that communicates in Darja but thinks in English. A *Daffy Darja* use-case.
 
 - `Masmo.js` (2019-04): Web-based, 16-bit MASM IDE.
 
-- `skill-dollhouse.py` (2019-06): A Skill for @MycroftAI to control USBKill via voice commands.
+- `skill-dollhouse.py` (2019-06): A *Skill* for @MycroftAI to control USBKill via voice commands.
 
-- `doxer--tech-spec-v0.rst` (2019-06): A (draft) tech spec for Shallow Doxer.
+- `shallow-doxxer--tech-spec-v0.rst` (2019-06): A trashy tech spec for Shallow Doxxer.
+
+- `AsocialCCP.ts` (2019-10): An e-payment system based on SMS and CCP ("postal money transfer") to overcome some of Algeria's annoying e-commerce issues.
 
 ## License
 WTFPL
