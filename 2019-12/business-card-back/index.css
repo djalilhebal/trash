@@ -1,0 +1,42 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background: black;
+  color: white;
+}
+
+.vcard {
+  background: darkred;
+  color: white;
+  border: 1mm solid white;
+  /* padding: 1mm; */
+  width: 90mm;
+  height: 50mm;
+  margin: auto;
+  margin-top: 10%;
+  text-align: center;
+}
+
+.vcard #qr {
+  display: inline-block;
+  background: white;
+  width: 125px;
+  height: 125px;
+  margin-top: 20px;
+  margin-bottom: 15px;
+}
+
+.vcard p {
+  font-size: 16px;
+  font-style: italic;
+  font-weight: bold;
+}
+
+section.notes {
+    white-space: pre;
+    font-family: monospace;
+    margin: 10px;
+}
