@@ -1,5 +1,5 @@
 //@ts-check
-// Tried to model it after Java's Semaphore class
+// I have tried to mimic the interface of Java's Semaphore class...
 class Semaphore {
   /**
    * @param {number} permits - initial available access permits

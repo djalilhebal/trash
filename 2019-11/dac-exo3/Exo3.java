@@ -1,13 +1,12 @@
 import java.util.concurrent.Semaphore;
 
 // NOTE: See index.html to learn what this code is about.
-// NOTE: To try different scenarios, just comment `p*.start()` in `main()`.
+// NOTE: To try different scenarios, just comment out `p*.start();` statements in `main`.
 
 public class Exo3 {
 
     static char[] T = {'-', '-', '-'};
 
-    static Semaphore mutex = new Semaphore(1, true);
     static Semaphore vide = new Semaphore(3, true);
     static Semaphore plein1 = new Semaphore(0, true);
     static Semaphore plein2 = new Semaphore(0, true);
@@ -35,7 +34,6 @@ class P1 extends Thread {
         while (true) {
             try {
                 Exo3.vide.acquire();
-                Exo3.mutex.acquire();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -45,7 +43,6 @@ class P1 extends Thread {
 
             i = (i + 1) % 3;
             Exo3.plein1.release();
-            Exo3.mutex.release();
         }
 
     }
@@ -61,7 +58,6 @@ class P2 extends Thread {
         while (true) {
             try {
                 Exo3.plein1.acquire();
-                Exo3.mutex.acquire();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -71,7 +67,6 @@ class P2 extends Thread {
 
             j = (j + 1) % 3;
             Exo3.plein2.release();
-            Exo3.mutex.release();
         }
     }
 
@@ -86,7 +81,6 @@ class P3 extends Thread {
         while (true) {
             try {
                 Exo3.plein2.acquire();
-                Exo3.mutex.acquire();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -97,7 +91,6 @@ class P3 extends Thread {
 
             k = (k + 1) % 3;
             Exo3.vide.release();
-            Exo3.mutex.release();
         }
     }
 

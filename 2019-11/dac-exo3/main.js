@@ -1,6 +1,7 @@
 //@ts-check
 // "main thread" ("UI Thread" à la Android)
 
+// These are our shared variables and their "views"
 const sharedT = new SharedArrayBuffer(4);
 const sharedV = new SharedArrayBuffer(4);
 const unit8T = new Uint8Array(sharedT);
@@ -23,14 +24,13 @@ unit8V[3] = '-'.charCodeAt(0); // V[L]
    ------------------------------------
 
 */
-
 const [$i, $j, $k, $l, $T0, $T1, $T2] =
   'i j k l T0 T1 T2'.split(' ')
   .map(id => document.querySelector(`#${id}`));
 
 /**
  * Update view
- * @todo Add caching? Maybe currentVT = [...V, ...T]; shouldUpdate = currentVT.some((x, i) => lastVT[i] !== x);
+ * @todo Update IIF changed: `currentVT = [...V, ...T]; changed = currentVT.some((x, i) => x !== lastVT[i]);`
  * @todo Refactor
  */
 function update() {

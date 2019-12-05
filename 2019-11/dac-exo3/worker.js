@@ -1,8 +1,9 @@
 //@ts-check
 self.importScripts('semaphore.js');
 
+// For practical reasons (see Notes in index.html), we use V[I] instead of i, etc.
 let T, V;
-const I = 0, J = 1, K = 2, L = 3; // V[I] instead of i, etc.
+const I = 0, J = 1, K = 2, L = 3;
 let vide, plein1, plein2;
 
 self.addEventListener('message', (ev) => {
@@ -40,6 +41,7 @@ self.addEventListener('message', (ev) => {
 
 async function p1() {
   console.log('P1: started');
+
   let c = 'a'.charCodeAt(0);
 
   while (true) {
@@ -57,7 +59,9 @@ async function p1() {
 
 async function p2() {
   console.log('P2: started');
+
   let C;
+
   while (true) {
     await plein1.acquire();
     await att();
@@ -72,6 +76,7 @@ async function p2() {
 
 async function p3() {
   console.log('P3: started');
+
   while (true) {
     await plein2.acquire();
     await att();
@@ -87,7 +92,7 @@ async function p3() {
 
 function att() {
   const n = Math.floor( (Math.random() * 5) + 1 );
-  return new Promise( (resolve, reject) => {
+  return new Promise((resolve, _reject) => {
     setTimeout(() => {
       resolve(n);
     }, n * 1000);

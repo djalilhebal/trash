@@ -3,7 +3,7 @@
   <head>
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>Exo3 - TD DAC - Les sémaphores</title>
+    <title>Exo3 - TD DAC - Les sémaphores</title><!-- 2019-11-30 -->
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
   </head>
@@ -15,9 +15,9 @@
 
     <main>
       <div id="p-list">
-        <span class="p">P1</span> i=<span id="i">0</span><br>
-        <span class="p">P2</span> j=<span id="j">0</span><br>
-        <span class="p">P3</span> k=<span id="k">0</span><br>
+        <span class="p">P1</span> i=<span id="i">0</span><br />
+        <span class="p">P2</span> j=<span id="j">0</span><br />
+        <span class="p">P3</span> k=<span id="k">0</span><br />
       </div>
       
       <table id="T">
@@ -46,62 +46,61 @@
 
     <section>
       <h2>Problem</h2>
-      "Three processes work on a table/"tampon" of length 3...
-      * P1 produces M1 (lowsercase letters);
+      "Three processes collaborate on a table/"tampon" of length 3...
+      * P1 produces M1 (lowercase letters);
       * P2 consumes M1 and produces M2 (uppercase letters);
-      * and P3 consumes M2 (and prints them of the screen).
+      * and P3 consumes M2 (and prints them on the screen).
       
       Can you synchronize these processes using semaphores?"
 
       ---
 
+      <b>My algorithm</b>
+
       semaphore vide = 3, plein1 = 0, plein2 = 0;
 
       P1: <b>p(vide);</b> produceM1(T[i]); i++; <b>v(plein1);</b>
-      P2: <b>p(plein1);</b> consumeM1andProduceM2(T[j]); j++; <b>v(plein2);</b>
+      P2: <b>p(plein1);</b> consumeM1AndProduceM2(T[j]); j++; <b>v(plein2);</b>
       P3: <b>p(plein2);</b> consumeM2(T[k]); k++; <b>v(vide);</b>
     </section>
 
-    <br>
+    <br />
 
     <section>
       <h2>In Java We Trust</h2>
-      There exist a an implementation in Java (with two variations), see:
-      - <a href="./Exo3-affiche.java" download>Exo3-affiche.java</a>: Similar to this demo but uses a mutex on T.
-      - <a href="./Exo3.java" download>Exo3.java</a>: Prints characters only (uses no mutex on T);
+      There exists an implementation in Java (with two variations), see:
+
+      - <a href="./Exo3-affiche.java" download>Exo3-affiche.java</a>: Similar to this demo but uses a mutex on T. ('Debug mode'?)
+
+      - <a href="./Exo3.java" download>Exo3.java</a>: Prints characters only (and uses no mutex on T as we don't really need them);
       You'll know it's working as expected when you see it printing uppercase letters in order.
     </section>
 
-    <br>
+    <br />
 
     <section>
       <h2>Notes</h2>
-      * You can test different scenarios by changing URL param "?scenario=p1,p2,p3"
+      * You can test different scenarios by changing the URL parameter `<b>?scenario=p1,p2,p3</b>` as in `<b>?scenario=p1,p3</b>` to see what would happen if only P1 and P3 work...
 
-      * You may say I'm cheating by making P2 read then replace P1's value... but then again, isn't the art of programming just a huge, organized cheating scheme?
+      * You may say I'm cheating by making P2 read then replace P1's values... but then again, isn't the art of programming just a huge, organized cheating scheme?
 
       * I have checked my algorithm...
-        1) By hand
-        2) Using Chrome's debugger
-        3) Using OpenJDK 8's built-in Semaphore and mutexes for printing/debugging states
+        1) by hand,
+        2) using Google Chrome's debugger,
+        3) and using OpenJDK 8's built-in Semaphore and mutexes for printing/debugging states (see section above).
 
-      * This demo uses `SharedArrayBuffer`s and `Atomics` to implement the Semaphore construct(?) across Web Workers.
+      * This demo uses `<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer">SharedArrayBuffer</a>`s and `<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Atomics">Atomics</a>` to implement the Semaphore construct(?) across <a href="https://developer.mozilla.org/en-US/docs/Web/API/Worker">Web Workers</a>.
 
       * I cannot guarentee 100% that the UI will be consistent since I'm not synchronizing the "UI Thread" with mutexes.
-      I am, however, using only two arrays <b>T</b> (for the 'tampon' obviously) and <b>V</b> (for <b>i</b>, <b>j</b>, <b>k</b>, and the <b>last consumed character</b>)
+      I am, however, using only two arrays <b>T</b> (for the 'tampon' obviously) and <b>V</b> (for <b>i</b>, <b>j</b>, <b>k</b>, and <b>l</b> -- the last consumed character)
       to make the occasional 'out of sync'-ness between the two sets of values as small as possible.
 
-      * Tested with Brave Browser v1.0.1 (Chromium v78) x64 on Ubuntu v18.04.3 LTS (running on 'AMD E1-1500 APU with Radeon(tm) HD Graphics x 2').
-      It worked on Mozilla Firefox v70 after 'unflagging'/enabling the 'Shared Memory' feature (see MDN to learn about it and why it was behind a flag).
+      * Tested with Brave Browser v1 (Chromium v78) x64 on Ubuntu v18.04 (running on 'AMD E1-1500 APU'),
+      and with Google Chrome v78 on Windows 10 x64 (running on 'Intel i7-7500U')
+
+      It worked on Mozilla Firefox v70 (Ubuntu) and Google Chrome v78 (Android) after 'unflagging'/enabling the 'Shared Memory' feature (see MDN to learn about it and why it was behind a flag).
     </section>
-<!-- TODO: Uncomment this after showing this trash l'prof
-    <br>
-    Exo3 -- 2019-11-30
-    <section>
-      <h2>Copyright</h2>
-      dreamski21 - CC BY 3.0 (I just want some attention y'all ._.)
-    </section>
--->
+
     <script src='semaphore.js'></script>
     <script src='main.js'></script>
   </body>
