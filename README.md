@@ -22,7 +22,9 @@ Like a collection of my *trashy tries*(?)
 
 - [`business-card-back`](https://dreamski21.github.io/trash/2019-12/business-card-back) (2019-12): The backside of my trashy "business card". _#QRCode_
 
-- [DAC Exo3](https://dreamski21.github.io/trash/2019-11/dac-exo3/?scenario=p1,p2,p3) (2019-11): _#semaphore #viz_
+- [DAC Exo3](https://dreamski21.github.io/trash/2019-11/dac-exo3/?scenario=p1,p2,p3) (2019-11): _#Semaphore #Viz_
+
+- [ ] [DAC Exo6](https://dreamski21.github.io/trash/2019-12/dac-exo6/) (2019-12): _#Semaphore #Animation #Phaser_
 
 ## Ideas expressed in code
 - `Romyo.rb` (2019-03): AI/chatbot that communicates in Darja but thinks in English. A *Daffy Darja* use-case.
