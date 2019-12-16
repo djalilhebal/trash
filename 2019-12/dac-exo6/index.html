@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link href="index.css" rel="stylesheet" />
+  <title>DAC Exo6</title>
+</head>
+<body>
+  <header>
+    <h1>DAC Exo6</h1>
+    <p class="subtitle">#Animation #Simulation #WIP</p>
+  </header>
+  <main>
+    <form autocomplete="off" spellcheck="false">
+      <fieldset>
+
+        <div id="user-vars">
+          <b>Sémaphores</b>
+            {<input name="sema-names" type="text" value="sFeu, sVide, sUnlucky" />}
+            =
+            {<input name="sema-vals" type="text" value="1, 1, 13" />}
+          <br />
+          <b>Entiers</b>
+            {<input name=int-names type="text" value="feu" />}
+            =
+            {<input name="int-vals" type="text" value="1" />}
+        </div>
+
+        <br />
+
+        <table>
+          <tr>
+            <th>Changement</th>
+            <th>Traversee1</th>
+            <th>Traversee2</th>
+          </tr>
+          <tr>
+            <td><textarea title="<lineNum>: <Error message goes here>" id="changement">p(sFeu);
+if (feu == 1) { >.<
+  feu = 2
+} else {
+  feu = 1
+}
+v(sFeu)
+            </textarea></td>
+            <td><textarea id="traversee1">p(sFeu)
+if (feu == 1) {
+  p(sVide)
+  p(sUnlucky)
+  circuler()
+  v(sVide)
+}
+v(sFeu)
+            </textarea></td>
+            <td><textarea id="traversee2">p(sFeu)
+if (feu == 2) {
+  p(sVide)
+  circuler()
+  v(sVide)
+}
+v(sFeu)
+                </textarea></td>
+          </tr>
+        </table>
+
+        <br />
+
+        <input type="reset" />
+        <input type="submit" value="Go!" />
+      </fieldset>
+      <button>Stop</button>
+    </form>
+
+    <br />
+
+    <div id="sim"></div>    
+
+    <br />
+
+  </main>
+
+  <section>
+    <h2>Ideas...</h2>
+    <pre>
+    - *Must* write everything in French ._.
+    
+    - Force user to declare 'feu' as `enum {1, 2}` (see the Problem section).
+
+    - If there's an error in (or an exception is raised from) a user's provided code, highlight the offending part and add an error message as a 'title' attribute.
+    - TO LEARN/FIX: Google Chrome throws "Uncaught SyntaxError: Strict mode code may not include a with statement" even though I have not activated "strict mode".
+    Does using the 'class' syntax automatically activate it?
+
+    - Sorting each road's cars with multiple queues is tricky:
+    create ordering priority depending on calls to p()
+    like 'p(sFeu); p(sVide); ...' creates `orderVec=['sFeu', 'sVide']` that will be used to sort it in its road.
+
+    - If car touches intersection, make it yellow.
+
+    - If two cars collide, stop everything(!) and make the screen red(?)
+
+    - When a car leaves intersection, make it fade after some time then destroy its instance.
+    </pre>
+  </section>
+
+  <section>
+      <h2>Problem / Exo</h2>
+      <pre>
+        ...
+      </pre>
+    </section>
+  
+  <section>
+    <h2>Notes</h2>
+    <pre>
+      * It makes use of:
+        - JavaScript's `eval` and `with` features which are deprecated and very discouraged
+        - some Promise-based and queue-based semaphore [TBD] (find an implementation that supports `getPosition(obj)` and `getName()`, fork one, or write my own thing)
+        - Phaser: a game engine [MAYBE] (for collusion detection and animation maybe)
+    
+    * Why?
+      - To learn Phaser(?)
+      - To practice DAC(?)
+    </pre>
+  </section>
+
+  <script src="index.js"></script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: snow;
+  text-align: center;
+}
+
+table {
+  margin: auto;
+  background: white;
+}
+
+fieldset {
+  border: 0px;
+}
+
+form {
+  background: lightgray;
+  padding: 10px;
+}
+
+#user-vars {
+  text-align: left;
+  background: white;
+  padding: 10px;
+  line-height: 2;
+  font-size: 17px;
+}
+
+#user-vars input {
+  border: 0;
+  border-bottom: 2px dashed black;
+  font-size: 17px;
+  outline: none;
+  color: darkblue;
+}
+
+textarea {
+  outline: none;
+  height: 125px;
+  color: darkblue;
+}
+textarea[title] {
+  background-color: red;
+  color: black;
+}
+
+/* itchio uses 640x360 by default */
+#sim {
+  background: black;
+  width: 640px;
+  height: 360px;
+  margin: auto;
+}
+
+section {
+  text-align: left;
+  background: lightgray;
+  margin: 5px;
+  padding: 10px;
+}
+section pre {
+  white-space: pre-line;
+}
