@@ -28,8 +28,6 @@
             {<input name="int-vals" type="text" value="1" />}
         </div>
 
-        <br />
-
         <table>
           <tr>
             <th>Changement</th>
@@ -65,19 +63,25 @@ v(sFeu)
           </tr>
         </table>
 
-        <br />
+        <div id="buttons">
+          <input type="submit" value="Start!" />
+          <button>Stop</button>
+          <input type="reset" value="Load my attempt" />
+          <button>Load correct solution</button>
+        </div>
 
-        <input type="reset" />
-        <input type="submit" value="Go!" />
       </fieldset>
-      <button>Stop</button>
     </form>
 
-    <br />
+    <div id="sim">
+      <span id="feu1" class="feu green"></span>
+      <div id="voi1"></div>
 
-    <div id="sim"></div>    
+      <div id="intersection"></div>
 
-    <br />
+      <span id="feu2" class="feu red"></span>
+      <div id="voi2"></div>
+    </div>
 
   </main>
 
@@ -89,35 +93,43 @@ v(sFeu)
     - Force user to declare 'feu' as `enum {1, 2}` (see the Problem section).
 
     - If there's an error in (or an exception is raised from) a user's provided code, highlight the offending part and add an error message as a 'title' attribute.
-    - TO LEARN/FIX: Google Chrome throws "Uncaught SyntaxError: Strict mode code may not include a with statement" even though I have not activated "strict mode".
-    Does using the 'class' syntax automatically activate it?
 
     - Sorting each road's cars with multiple queues is tricky:
     create ordering priority depending on calls to p()
     like 'p(sFeu); p(sVide); ...' creates `orderVec=['sFeu', 'sVide']` that will be used to sort it in its road.
+    - To pop or not to pop? Add both variants? Inform the user to pay attention?
+    - pop is simple but bad if you use conditions. Similar problems happen if you don't pop...
+    - Instead of pop()'ing, replace sema with -Infinity?
+    - p() unshift()s a val into orderVec?
+    
+    * Animation:
+    - Idea: just output states as JSON, and think of the actual rendering later?
+    - Using: https://developer.mozilla.org/en-US/docs/Web/CSS/order
+    - Interesting: https://stackoverflow.com/questions/8123525/using-jquery-to-re-order-and-animate-list-items
+
+    - When a car leaves intersection, make it fade after some time then destroy its instance.
 
     - If car touches intersection, make it yellow.
 
     - If two cars collide, stop everything(!) and make the screen red(?)
-
-    - When a car leaves intersection, make it fade after some time then destroy its instance.
     </pre>
   </section>
 
   <section>
-      <h2>Problem / Exo</h2>
-      <pre>
-        ...
-      </pre>
-    </section>
+    <h2>Problem / Exo</h2>
+    <pre>
+    ...
+    </pre>
+  </section>
   
   <section>
     <h2>Notes</h2>
     <pre>
-      * It makes use of:
-        - JavaScript's `eval` and `with` features which are deprecated and very discouraged
-        - some Promise-based and queue-based semaphore [TBD] (find an implementation that supports `getPosition(obj)` and `getName()`, fork one, or write my own thing)
-        - Phaser: a game engine [MAYBE] (for collusion detection and animation maybe)
+    * It makes use of:
+      - JavaScript's `eval` and `with` features which are deprecated and very discouraged
+      - Lodash for some FP functions (mapping and zipping stuff...)
+      - some Promise-based and queue-based semaphore [TBD] (find an implementation that supports `getPosition(obj)` and `getName()`, fork one, or write my own thing)
+      - Phaser: a game engine [MAYBE] (for collusion detection and animation maybe)
     
     * Why?
       - To learn Phaser(?)
@@ -125,6 +137,22 @@ v(sFeu)
     </pre>
   </section>
 
+  <section>
+    <h2>Credits</h2>
+    <pre>
+    - {City car, Truck, Traffic lights green, Traffic lights red} icon by <a href="http://delapouite.com">Delapouite</a> under CC BY 3.0
+    </pre>
+  </section>
+  
+  <section>
+    <h2>Refs</h2>
+    <pre>
+    - B. P. Miller, <i>What to Draw? When to Draw? An Essay on Parallel Program Visualization</i>
+    - Wikipedia, Queueing Theory, networks and network jams
+    </pre>
+  </section>
+
+  <script src="scripts/lodash.js"></script>
   <script src="index.js"></script>
 </body>
 </html>

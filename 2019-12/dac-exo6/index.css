@@ -8,57 +8,106 @@ body {
   text-align: center;
 }
 
-table {
-  margin: auto;
-  background: white;
+/********************************/
+
+form {
+  background: lightgray;
+  padding: 5px;
 }
 
 fieldset {
   border: 0px;
 }
 
-form {
-  background: lightgray;
-  padding: 10px;
+table {
+  background: white;
+  margin: auto;
 }
 
 #user-vars {
-  text-align: left;
   background: white;
-  padding: 10px;
+  text-align: left;
+  padding: 5px;
+  margin: 10px;
   line-height: 2;
   font-size: 17px;
 }
 
 #user-vars input {
+  color: darkblue;
+  font-size: 17px;
   border: 0;
   border-bottom: 2px dashed black;
-  font-size: 17px;
   outline: none;
-  color: darkblue;
 }
 
 textarea {
-  outline: none;
-  height: 125px;
   color: darkblue;
+  height: 150px;
+  outline: none;
 }
 textarea[title] {
   background-color: red;
   color: black;
 }
 
-/* itchio uses 640x360 by default */
+/********************************/
+
+/* itch.io uses 640x360 by default */
 #sim {
   background: black;
   width: 640px;
   height: 360px;
-  margin: auto;
+  margin: 10px auto;
+  display: grid;
+  place-items: center right;
 }
 
+/* These filter colors are temporary
+ "CSS filter generator to convert from black to target hex color"
+  https://codepen.io/sosuke/pen/Pjoqqp
+*/
+.feu {
+  width: 50px;
+  height: 50px;
+  background-color: gray;
+  background-image: url(images/traffic-lights-red.svg);
+  border-radius: 50%;
+  filter: invert(19%) sepia(100%) saturate(7475%) hue-rotate(360deg) brightness(108%) contrast(114%);
+}
+.feu.green {
+  background-image: url(images/traffic-lights-green.svg);
+  filter: invert(28%) sepia(77%) saturate(5957%) hue-rotate(121deg) brightness(90%) contrast(105%);
+}
+
+#voi1, #voi2 {
+  background: white;
+  padding: 5px;
+  width: 50%;
+  display: flex;
+  height: 25px;
+}
+
+#intersection {
+  background: white;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+}
+
+.vehicle {
+  background-color: black;
+  display: inline-block;
+  width: 50px;
+  height: 25px;
+  margin-left: 5px;
+}
+
+/********************************/
+
 section {
-  text-align: left;
   background: lightgray;
+  text-align: left;
   margin: 5px;
   padding: 10px;
 }

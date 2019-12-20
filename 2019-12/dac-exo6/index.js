@@ -1,39 +1,53 @@
+// import { mapValues, zipObject } from './lodash.js';
+// import SillySemaphore as Sema from './SillySemaphore.js'
+
 /**
  * @file DAC Exo6
  */
 
  /**
- * It must be a Promise-based Semaphore that uses a queue
- *
- * - Must I pass `obj` to acquire() and release()?
+ * A Promise-based and queue-based Semaphore
+ * @todo maybe fork or learn from https://github.com/zeit/async-sema
  */
-class Sema {
+class SillySemaphore {
+
   constructor(permits) {
-    this.permits = permits;
-    this.queue = [];
+    this._permits = permits;
+    this._queue = [];
   }
 
-  getPosition(targetObj) {
-    return this.queue.findIndex(obj => obj === targetObj);
+  getPosition(requester) {
+    return this._queue.findIndex(entry => entry.requester === requester);
+  }
+
+  async acquire(requester) {
+    return new Promise( (resolve, reject) => {
+      this._queue.push({
+        requester,
+        resolve,
+        reject
+      });
+      this._maybeNotify();
+    });
+  }
+
+  async release(_requester) {
+    this._permits++;
+    this._maybeNotify();
+  }
+
+  _maybeNotify() {
+    if (this._permits > 0) {
+      const entry = this._queue.shift();
+      if (entry) {
+        entry.resolve();
+      }
+    }
   }
 
 }
-
-/**
- * 
- * @example
- * assert({
- *  given: 'two arrays'
- *  should: 'pair each element with its peer',
- *  expected: [ ['a', 1], ['b', 2] ],
- *  actual: zip(['a', 'b'], [1, 2]),
- * })
- * 
- * @param {Array} arrA 
- * @param {Array} arrB 
- * @returns {Array}
- */
-const zip = (arrA, arrB) => arrA.map((x, i) => [ x, arrB[i] ]);
+const Sema = SillySemaphore;
+const { mapValues, zipObject } = _; // Lodash
 
 /**
  * Prefix "p", "v", and "circuler" with the `await` keyword
@@ -71,7 +85,7 @@ function awaitify(code) {
 /**
  * A car's place in line is determined by a vector of priorities
  * 
- * @todo Dedup before returning
+ * @todo Dedup before returning?
  * @todo Handle whitespace?
  * 
  * @param {string} code
@@ -92,6 +106,12 @@ const ui = {
   $changement: $('#changement'),
   $traversee1: $('#traversee1'),
   $traversee2: $('#traversee2'),
+
+  $feu1: $('#feu1'),
+  $feu2: $('#feu2'),
+  $voi1: $('#voi1'),
+  $voi2: $('#voi2'),
+  $intersection: $('#intersection'),
 }
 
 ui.$form.onsubmit = (ev) => {
@@ -102,40 +122,38 @@ ui.$form.onsubmit = (ev) => {
   // - Run actual sim
 }
 
-const userAlgos = {
-  changement: awaitify(ui.$changement.value),
-  traversee1: awaitify(ui.$traversee1.value),
-  traversee2: awaitify(ui.$traversee2.value),
+const userAlgosRaw = {
+  changement: ui.$changement.value,
+  traversee1: ui.$traversee1.value,
+  traversee2: ui.$traversee2.value,
 }
 
-// TODO: just map over the userAlgos object
-const userVecs = {
-  changement: getOrderVector(userAlgos.changement),
-  traversee1: getOrderVector(userAlgos.traversee1),
-  traversee2: getOrderVector(userAlgos.traversee2),
-}
+const userAlgos = mapValues(userAlgosRaw, awaitify);
+
+const userVecs = mapValues(userAlgos, getOrderVector);
 
 const userVars = {};
 {
   const formData = new FormData(ui.$form);
   const SEP = /,\s*/; // separator
 
-  const userSemas = Object.fromEntries(zip(
+  const userSemas = zipObject(
     formData.get('sema-names').split(SEP),
     formData.get('sema-vals').split(SEP).map(val => new Sema(Number(val)))
-  ));
+  );
 
-  const userInts = Object.fromEntries(zip(
+  const userInts = zipObject(
     formData.get('int-names').split(SEP),
     formData.get('int-vals').split(SEP).map(val => Number(val))
-  ));
+  );
 
   Object.assign(userVars, userSemas, userInts);
 }
 
+// TODO: Rename to Sim maybe
 class Exo6 {
 
-  // static userVars = {}; // nrmlm
+  static userVars = {}; // nrmlm
   static voi1 = [];
   static voi2 = [];
   // ...
@@ -150,37 +168,67 @@ class Exo6 {
     drawFeu();
   }
 
-  drawVois() {
+  static drawVois() {
     const {voi1, voi2} = Exo6;
     const tousTraversees = [...voi1, ...voi2];
+
+    // Update wait vector and use it to calculate order in line
     for (const traversee of tousTraversees) {
       traversee.updateWaitVector();
+      traversee.$elem.style.order = traversee.getWaitVector().join('');
     }
-
-    voi1.sort(byVector);
-    voi2.sort(byVector);
   }
 
-  drawFeu() {
-    if (feu == 1) {
-      feu1.color = 'green';
-      feu2.color = 'red';
+  static drawFeu() {
+    if (userVars.feu == 1) {
+      ui.$feu1.classList.add('green');
+      ui.$feu2.classList.remove('green'); // set red
     } else {
-      feu2.color = 'green';
-      feu1.color = 'red';
+      ui.$feu2.classList.add('green');
+      ui.$feu1.classList.remove('green'); // set red
     }
+  }
+
+  static showError(target, message) {
+    ui[ '$' + target ].setAttribute('title', message);
+  }
+
+  static clearErrors() {
+    // - remove attr title from all inputs...
   }
 
 }
 
 class Traversee {
 
-  static freeColors = 'blue darkkhaki gray green red orange purple yellow'.split();
+  static freeColors = 'blue darkkhaki green red orange purple yellow'.split(' ');
   // ...
 
-  constructor() {
-    this.color = getUniqueColor();
+  constructor(algoSource) {
+    this.algoSource = algoSource;
+    this.color = this.getUniqueColor();
     this.waitVec = [];
+
+    this.$elem = document.createElement('span');
+    this.$elem.classList.add('vehicle');
+    this.$elem.style.backgroundColor = this.color;
+  }
+
+  async run() {
+    const getErrorLineNum = err => Number( err.stack.match(/:(\d+):\d+$/)[1] );
+    const thisLineNum = getErrorLineNum(new Error());
+    const evalLineNum = thisLineNum + 5;
+    try {
+      new Function(`
+      with (this) {
+        eval(userAlgos[algoSource]);
+      }
+      `)();
+    } catch (e) {
+      const relativeLineNum = getErrorLineNum(e) - evalLineNum;
+      const relativeMessage = `${relativeLineNum}: ${e.message}`;
+      Exo6.showError(this.algoSource, relativeMessage);
+    }
   }
 
   updateWaitVector() {
@@ -188,72 +236,53 @@ class Traversee {
   }
 
   getWaitVector() {
-    const vec = orderVec.map(semaName => userVars[semaName].getPosition(this) );
+    const vec = this.waitVec.map(semaName => userVars[semaName].getPosition(this) );
     return vec;
   }
 
   getUniqueColor() {
-    return Traversee.freeColors.unshift();
+    return Traversee.freeColors.shift();
   }
 
   destroy() {
     Traversee.freeColors.push( this.color );
-    this.color = ''; // is this statement meaningless? Not even for semantic purposes?
     // - remove from the road's list
   }
 
 }
 
 class Traversee1 extends Traversee {
-  constructor() {
-    super();
-  }
 
-  // TODO: Refactor to call 'super.run()'
-  async run() {
-    with (this) {
-      eval(userAlgos.traversee1);
-    }
-    // Actually, it needs to be something more like this:
-    /*
-    const getErrorLineNum = err => Number( err.stack.match(/:(\d+):\d+$/)[1] );
-    const thisLineNum = getErrorLineNumber(new Error());
-    const evalLineNum = thisLineNum + 3;
-    try {
-      with (this) {
-        eval(userAlgos.traversee1);
-      }
-    } catch (e) {
-      const relativeLineNum = getErrorLineNum(e) - evalLineNum;
-      const relativeMessage = `${relativeLineNum}: ${e.message}`;
-      ui.$traversee1.setAttribute('title', relativeMessage);
-    }
-    */
+  constructor() {
+    super('traversee1');
+    this.waitVec = userVecs.traversee1;
+    ui.$voi1.append(this.$elem);
   }
 
   async circuler() {
     await moveToIntersection();
     await moveOutIntersection();
 
-    keepMovingForward() // don't await the rest
-      .then(fadeOut)
-      .then(destory);
+    // don't await the rest
+    keepMovingForward()
+      .then(this.fadeOut)
+      .then(this.destroy);
   }
 
   async p(x) {
     if (typeof x === 'string') {
-      await userVars[x].acquire();
+      await userVars[x].acquire(this);
     } else {
-      await x.acquire();
+      await x.acquire(this);
     }
-    this.orderVec.unshift(); // maybe?
+    this.waitVec.shift(); // maybe?
   }
 
   async v(x) {
     if (typeof x === 'string') {
-      await userVars[x].release();
+      await userVars[x].release(this);
     } else {
-      await x.release();
+      await x.release(this);
     }
   }
 
