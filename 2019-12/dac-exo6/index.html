@@ -18,9 +18,9 @@
 
         <div id="user-vars">
           <b>Sémaphores</b>
-            {<input name="sema-names" type="text" value="sFeu, sVide, sUnlucky" />}
+            {<input name="sema-names" type="text" value="sFeu1, sFeu2, sVide1, sVide2" />}
             =
-            {<input name="sema-vals" type="text" value="1, 1, 13" />}
+            {<input name="sema-vals" type="text" value="1, 0, 1, 1" />}
           <br />
           <b>Entiers</b>
             {<input name=int-names type="text" value="feu" />}
@@ -35,39 +35,74 @@
             <th>Traversee2</th>
           </tr>
           <tr>
-            <td><textarea title="<lineNum>: <Error message goes here>" id="changement">p(sFeu);
-if (feu == 1) { >.<
-  feu = 2
-} else {
-  feu = 1
-}
-v(sFeu)
-            </textarea></td>
-            <td><textarea id="traversee1">p(sFeu)
+            <td>
+<textarea id="changement">while (true) {
+  sleep(15)
+  if (feu == 1) {
+    p(sFeu1)
+    feu = 2
+    v(sFeu2)
+  } else {
+    p(sFeu2)
+    feu = 1
+    v(sFeu1)
+  }
+}</textarea>
+          </td>
+          <td>
+<textarea id="traversee1">p(sVide1)
+p(sFeu1)
+circuler()
+v(sFeu1)
+v(sVide1)</textarea>
+          </td>
+          <td>
+<textarea id="traversee2">p(sVide2)
+p(sFeu2)
+circuler()
+v(sFeu2)
+v(sVide2)</textarea>
+      </td>
+</tr>
+<!--<tr>
+            <td>
+<textarea" id="changement">while (true) {
+  sleep(10)
+  p(sFeu)
+  if (feu == 1) {
+    feu = 2
+  } else {
+    feu = 1
+  }
+  v(sFeu)
+}</textarea>
+          </td>
+          <td>
+<textarea id="traversee1">p(sFeu)
 if (feu == 1) {
   p(sVide)
-  p(sUnlucky)
   circuler()
   v(sVide)
 }
-v(sFeu)
-            </textarea></td>
-            <td><textarea id="traversee2">p(sFeu)
+v(sFeu)</textarea>
+          </td>
+          <td>
+<textarea id="traversee2">p(sFeu)
 if (feu == 2) {
   p(sVide)
   circuler()
   v(sVide)
 }
-v(sFeu)
-                </textarea></td>
-          </tr>
+v(sFeu)</textarea>
+      </td>
+</tr>-->
         </table>
 
         <div id="buttons">
-          <input type="submit" value="Start!" />
-          <button>Stop</button>
-          <input type="reset" value="Load my attempt" />
-          <button>Load correct solution</button>
+          <input id="btn-start" type="submit" value="Start!" />
+          <button id="btn-stop" disabled>Stop</button>
+          <button id="btn-load-attempt" disabled>Load my attempt</button>
+          <button id="btn-load-correct" disabled>Load correct solution</button>
         </div>
 
       </fieldset>
@@ -75,12 +110,12 @@ v(sFeu)
 
     <div id="sim">
       <span id="feu1" class="feu green"></span>
-      <div id="voi1"></div>
+      <div id="voie1"></div>
 
       <div id="intersection"></div>
 
-      <span id="feu2" class="feu red"></span>
-      <div id="voi2"></div>
+      <span id="feu2" class="feu"></span>
+      <div id="voie2"></div>
     </div>
 
   </main>
@@ -118,6 +153,8 @@ v(sFeu)
   <section>
     <h2>Problem / Exo</h2>
     <pre>
+    Le carrefour ou le problème de la gestion des feux de circularion.
+    La circulation au carrefour de deux voies est réglée par des signaux lumineux (feu vert/rouge).
     ...
     </pre>
   </section>
@@ -126,14 +163,18 @@ v(sFeu)
     <h2>Notes</h2>
     <pre>
     * It makes use of:
-      - JavaScript's `eval` and `with` features which are deprecated and very discouraged
-      - Lodash for some FP functions (mapping and zipping stuff...)
-      - some Promise-based and queue-based semaphore [TBD] (find an implementation that supports `getPosition(obj)` and `getName()`, fork one, or write my own thing)
+      - JavaScript's `with` feature which is deprecated and very discouraged
+      - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AsyncFunction
+      - <s>Lodash for some FP functions (mapping and zipping stuff...)</s>
+      - My Promise-based and queue-based semaphore [TBD] (find an implementation that supports `getPosition(obj)` and `getName()`, fork one, or write my own thing)
       - Phaser: a game engine [MAYBE] (for collusion detection and animation maybe)
-    
+
     * Why?
       - To learn Phaser(?)
       - To practice DAC(?)
+
+    * Tested with Brave Browser v1.1 (Chromium v79.0)
+    * NOTE: Performance does not matter; if anything, we want to make things slower!
     </pre>
   </section>
 

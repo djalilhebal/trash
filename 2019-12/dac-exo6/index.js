@@ -1,15 +1,15 @@
-// import { mapValues, zipObject } from './lodash.js';
-// import SillySemaphore as Sema from './SillySemaphore.js'
+// import { mapValues, zipObject } from './scripts/lodash.js';
+// import SillySemaphore as Sema from './scripts/semaphore.js';
 
 /**
  * @file DAC Exo6
  */
 
- /**
+/**
  * A Promise-based and queue-based Semaphore
  * @todo maybe fork or learn from https://github.com/zeit/async-sema
  */
-class SillySemaphore {
+const Sema = class SillySemaphore {
 
   constructor(permits) {
     this._permits = permits;
@@ -40,147 +40,130 @@ class SillySemaphore {
     if (this._permits > 0) {
       const entry = this._queue.shift();
       if (entry) {
+        this._permits--;
         entry.resolve();
       }
     }
   }
 
 }
-const Sema = SillySemaphore;
+
 const { mapValues, zipObject } = _; // Lodash
 
-/**
- * Prefix "p", "v", and "circuler" with the `await` keyword
- * 
- * @example
- * assert({
- *   given: 'a piece of code',
- * 
- *   should: 'prefix "p", "v", and "circuler" with "await"',
- *
- *   expected: `
- *   if (feu == 2) {
- *     await p(sVide)
- *     await p(sFeu)
- *     await circuler()
- *     await v(sVide)
- *   }
- *   await v(sFeu)`,
- *
- *   actual: awaitify(`if (feu == 2) {
- *     p(sVide)
- *     circuler()
- *     v(sVide)
- *   }
- *   v(sFeu)`),
- * })
- * 
- * @param {string} code
- * @returns {string}
- */
-function awaitify(code) {
-  return code.replace(/\b(p|v|circuler)\(/g, 'await $1(');
-}
+// HACK: All refs to ui should really point directly to Exo6.ui
+let ui = null;
 
-/**
- * A car's place in line is determined by a vector of priorities
- * 
- * @todo Dedup before returning?
- * @todo Handle whitespace?
- * 
- * @param {string} code
- * @return {Array<string>}
- */
-function getOrderVector(code) {
-  const pCalls = code.match(/p\((\w+)\)/g) || [];
-  const acquiredSemaphores = pCalls.map(x => x.slice(2, -1))
-  return acquiredSemaphores
-}
-
-const $ = str => document.querySelector(str);
-
-// caching 'select queries' kinda
-const ui = {
-  $form: $('form'),
-
-  $changement: $('#changement'),
-  $traversee1: $('#traversee1'),
-  $traversee2: $('#traversee2'),
-
-  $feu1: $('#feu1'),
-  $feu2: $('#feu2'),
-  $voi1: $('#voi1'),
-  $voi2: $('#voi2'),
-  $intersection: $('#intersection'),
-}
-
-ui.$form.onsubmit = (ev) => {
-  ev.preventDefault();
-  // - Collect user defined stuff (userAlgos, userVecs, userVars)
-  // - Do a test sim to assert that 'userAlgos' don't throw when 'eval()'ed;
-  //  else abort and alert user.
-  // - Run actual sim
-}
-
-const userAlgosRaw = {
-  changement: ui.$changement.value,
-  traversee1: ui.$traversee1.value,
-  traversee2: ui.$traversee2.value,
-}
-
-const userAlgos = mapValues(userAlgosRaw, awaitify);
-
-const userVecs = mapValues(userAlgos, getOrderVector);
-
-const userVars = {};
-{
-  const formData = new FormData(ui.$form);
-  const SEP = /,\s*/; // separator
-
-  const userSemas = zipObject(
-    formData.get('sema-names').split(SEP),
-    formData.get('sema-vals').split(SEP).map(val => new Sema(Number(val)))
-  );
-
-  const userInts = zipObject(
-    formData.get('int-names').split(SEP),
-    formData.get('int-vals').split(SEP).map(val => Number(val))
-  );
-
-  Object.assign(userVars, userSemas, userInts);
-}
-
-// TODO: Rename to Sim maybe
 class Exo6 {
 
-  static userVars = {}; // nrmlm
-  static voi1 = [];
-  static voi2 = [];
-  // ...
+  static userVars = {};
+  static userAlgos = {};
+  static voie1 = [];
+  static voie2 = [];
+  static chan = null;
 
-  main() {
-    // Repeat:
-    // If there's some free place in any road, maybe/randomly create a few car instance
+  static ui = {};
+  static creatorInterval = null;
+  static drawerInterval = null;
+
+  static start() {
+    Exo6.clearErrors();
+    Exo6.loadUserInputs();
+    Exo6.ui.$fieldset.disabled = true;
+    Exo6.initCreator();
+    Exo6.initDrawer();
+    // ...
   }
 
-  draw() {
-    drawVois();
-    drawFeu();
+  static stop() {
+    clearInterval(Exo6.creatorInterval);
+    clearInterval(Exo6.drawerInterval);
+    Exo6.ui.$fieldset.disabled = false;
+    // ...
   }
 
-  static drawVois() {
-    const {voi1, voi2} = Exo6;
-    const tousTraversees = [...voi1, ...voi2];
+  static setup() {
+    const $ = str => document.querySelector(str);
 
-    // Update wait vector and use it to calculate order in line
-    for (const traversee of tousTraversees) {
-      traversee.updateWaitVector();
-      traversee.$elem.style.order = traversee.getWaitVector().join('');
+    Object.assign(Exo6.ui, {
+      $form: $('form'),
+      $fieldset: $('form fieldset'),
+
+      $changement: $('#changement'),
+      $traversee1: $('#traversee1'),
+      $traversee2: $('#traversee2'),
+
+      $feu1: $('#feu1'),
+      $feu2: $('#feu2'),
+      $voie1: $('#voie1'),
+      $voie2: $('#voie2'),
+      $intersection: $('#intersection'),
+    })
+
+    Exo6.ui.$form.onsubmit = (ev) => {
+      ev.preventDefault();
+      Exo6.start();
     }
+
+    ui = Exo6.ui;
+  }
+  
+  static loadUserInputs() {
+    // userAlgos...
+    Object.assign(Exo6.userAlgos, 
+      {
+        changement: ui.$changement.value,
+        traversee1: ui.$traversee1.value,
+        traversee2: ui.$traversee2.value,
+      }
+    )
+
+    // userVars...
+    const formData = new FormData(ui.$form);
+    const SEP = /,\s*/; // separator
+
+    const userSemas = zipObject(
+      formData.get('sema-names').split(SEP),
+      formData.get('sema-vals').split(SEP).map(val => new Sema(Number(val)))
+    );
+
+    const userInts = zipObject(
+      formData.get('int-names').split(SEP),
+      formData.get('int-vals').split(SEP).map(val => Number(val))
+    );
+
+    Object.assign(Exo6.userVars, userSemas, userInts);
+  }
+
+  static initCreator() {
+    Exo6.chan = new Changement();
+
+    // Maybe create an instance of Traversee every 3 secs
+    Exo6.creatorInterval = setInterval(function maybeCreate() {
+      const {voie1, voie2} = Exo6;
+      if (Math.random() < 0.5) {
+        if (voie1.length < Traversee.MAX_PAR_VOI) {
+          voie1.push( new Traversee1() );
+        }
+      } else {
+        if (voie2.length < Traversee.MAX_PAR_VOI) {
+          voie2.push( new Traversee2() );
+        }
+      }
+    }, 3 * 1000);
+  }
+
+  static initDrawer() {
+    // Redraw every half a sec
+    Exo6.drawerInterval = setInterval(Exo6.drawAll, 0.25 * 1000);
+  }
+
+  static drawAll() {
+    Exo6.drawFeu();
+    Exo6.drawVois();
   }
 
   static drawFeu() {
-    if (userVars.feu == 1) {
+    if (Exo6.userVars.feu == 1) {
       ui.$feu1.classList.add('green');
       ui.$feu2.classList.remove('green'); // set red
     } else {
@@ -189,54 +172,164 @@ class Exo6 {
     }
   }
 
+  static drawVois() {
+    const {voie1, voie2} = Exo6;
+    const tousTraversees = [...voie1, ...voie2];
+
+    // Update wait vector and use it to calculate order in line
+    for (const traversee of tousTraversees) {
+      traversee.$elem.style.order = traversee.getOrderVector().join('');
+    }
+  }
+
   static showError(target, message) {
     ui[ '$' + target ].setAttribute('title', message);
   }
 
   static clearErrors() {
-    // - remove attr title from all inputs...
+    ui.$form.querySelectorAll('[title]').forEach($x => $x.removeAttribute('title'));
   }
 
 }
 
-class Traversee {
+class Algorithme {
 
-  static freeColors = 'blue darkkhaki green red orange purple yellow'.split(' ');
-  // ...
-
-  constructor(algoSource) {
-    this.algoSource = algoSource;
-    this.color = this.getUniqueColor();
-    this.waitVec = [];
-
-    this.$elem = document.createElement('span');
-    this.$elem.classList.add('vehicle');
-    this.$elem.style.backgroundColor = this.color;
+  /**
+   * @param {String} source - "changement", "traversee1", or "traversee2"
+   */
+  constructor(source) {
+    this.source   = source;
+    this.userAlgo = Exo6.userAlgos[source];
+    this.waitVec  = Algorithme.parseOrderVector(this.userAlgo);
   }
 
   async run() {
-    const getErrorLineNum = err => Number( err.stack.match(/:(\d+):\d+$/)[1] );
-    const thisLineNum = getErrorLineNum(new Error());
-    const evalLineNum = thisLineNum + 5;
+    const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+    const getErrorLineNum = e => Number( e.stack.match(/:(\d+):\d+\)?$/m)[1] );
+    const referenceLineNum = getErrorLineNum(new Error());
+    const userStartLineNum = referenceLineNum + 6;
     try {
-      new Function(`
-      with (this) {
-        eval(userAlgos[algoSource]);
+      await new AsyncFunction('that', `
+      with (that) {
+        with (Exo6.userVars) {
+          ${ Algorithme.awaitify(this.userAlgo) }
+        }
       }
-      `)();
-    } catch (e) {
-      const relativeLineNum = getErrorLineNum(e) - evalLineNum;
-      const relativeMessage = `${relativeLineNum}: ${e.message}`;
-      Exo6.showError(this.algoSource, relativeMessage);
+      `)(this);
+    } catch (userError) {
+      console.warn(userError)
+      const relativeLineNum = getErrorLineNum(userError) - userStartLineNum;
+      const relativeMessage = `${relativeLineNum}: ${userError.message}`;
+      Exo6.showError(this.source, relativeMessage);
     }
   }
 
-  updateWaitVector() {
-    this.waitVec = this.getWaitVector();
+  async p(x) {
+    if (typeof x === 'string') {
+      await Exo6.userVars[x].acquire(this);
+    } else {
+      await x.acquire(this);
+    }
+    this.waitVec.shift(); // maybe?
   }
 
-  getWaitVector() {
-    const vec = this.waitVec.map(semaName => userVars[semaName].getPosition(this) );
+  async v(x) {
+    if (typeof x === 'string') {
+      await Exo6.userVars[x].release(this);
+    } else {
+      await x.release(this);
+    }
+  }
+
+  async sleep(secs) {
+    return new Promise((resolve, _reject) => {
+      setTimeout(resolve, secs * 1000);
+    });
+  }
+
+  /**
+   * Prefix "p", "v", "sleep", and "circuler" with the `await` keyword
+   * @param {string} code
+   * @returns {string}
+   */
+  static awaitify(code) {
+    return code.replace(/\b(p|v|sleep|circuler)\(/g, 'await $1(');
+  }
+
+  /**
+   * A vehicle's place in line is determined by a vector of priorities
+   * which are based on calls to p(...)
+   * 
+   * @todo Dedup before returning?
+   * @todo Handle whitespace?
+   * 
+   * @param {string} code
+   * @return {Array<string>}
+   */
+  static parseOrderVector(code) {
+    const pCalls = code.match(/p\((\w+)\)/g) || [];
+    const acquiredSemaphores = pCalls.map(x => x.slice(2, -1));
+    return acquiredSemaphores;
+  }
+
+}
+
+
+class Changement extends Algorithme {
+
+  constructor() {
+    super('changement');
+    this.run();
+    // ...
+  }
+
+}
+
+
+class Traversee extends Algorithme {
+
+  static MAX_PAR_VOI = 5;
+  static freeColors = 'blue coral darkkhaki green gray red skyblue teal orange pink purple yellow'.split(' ');
+  // ...
+
+  constructor(algoSource) {
+    super(algoSource);
+
+    this.color = this.getUniqueColor();
+    this.type = Math.random() < 0.2 ? 'truck' : 'car'; // 20% chance of being a truck
+
+    this.$elem = document.createElement('span');
+    this.$elem.classList.add('vehicle', this.type);
+    this.$elem.style.backgroundColor = this.color;
+    this.$elem.style.order = '999'; // HACKS
+  }
+
+  async circuler() {
+    // start moving
+    await this.sleep(1);
+
+    // cross(?) the intersection then "keep moving" and fade away...
+    await this.enterIntersection();
+    await this.leaveIntersection();
+
+    this.destroy();
+  }
+
+  async enterIntersection() {
+    Exo6.ui.$intersection.append(
+      this.$elem.parentNode.removeChild(this.$elem)
+    )
+    await this.sleep(1);
+  }
+
+  async leaveIntersection() {
+   this.$elem.style.opacity = '0';
+   await this.sleep(1);
+  }
+
+  getOrderVector() {
+    const indexes = this.waitVec.map(semaName => Exo6.userVars[semaName].getPosition(this) );
+    const vec = indexes.map(i => i + 1); // to get rid of '-1' values
     return vec;
   }
 
@@ -246,44 +339,37 @@ class Traversee {
 
   destroy() {
     Traversee.freeColors.push( this.color );
-    // - remove from the road's list
+    this.$elem.remove();
+    // remove from the road's list
+    if (this.source === 'traversee1') {
+      Exo6.voie1.splice(Exo6.voie1.findIndex(t => t === this), 1);
+    } else {
+      Exo6.voie2.splice(Exo6.voie2.findIndex(t => t === this), 1);
+    }
   }
 
 }
+
 
 class Traversee1 extends Traversee {
 
   constructor() {
     super('traversee1');
-    this.waitVec = userVecs.traversee1;
-    ui.$voi1.append(this.$elem);
-  }
-
-  async circuler() {
-    await moveToIntersection();
-    await moveOutIntersection();
-
-    // don't await the rest
-    keepMovingForward()
-      .then(this.fadeOut)
-      .then(this.destroy);
-  }
-
-  async p(x) {
-    if (typeof x === 'string') {
-      await userVars[x].acquire(this);
-    } else {
-      await x.acquire(this);
-    }
-    this.waitVec.shift(); // maybe?
-  }
-
-  async v(x) {
-    if (typeof x === 'string') {
-      await userVars[x].release(this);
-    } else {
-      await x.release(this);
-    }
+    ui.$voie1.append(this.$elem);
+    this.run();
   }
 
 }
+
+
+class Traversee2 extends Traversee {
+
+  constructor() {
+    super('traversee2');
+    ui.$voie2.append(this.$elem);
+    this.run();
+  }
+
+}
+
+Exo6.setup();

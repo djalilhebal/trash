@@ -12,7 +12,6 @@ body {
 
 form {
   background: lightgray;
-  padding: 5px;
 }
 
 fieldset {
@@ -28,7 +27,7 @@ table {
   background: white;
   text-align: left;
   padding: 5px;
-  margin: 10px;
+  margin: 5px;
   line-height: 2;
   font-size: 17px;
 }
@@ -45,10 +44,15 @@ textarea {
   color: darkblue;
   height: 150px;
   outline: none;
+  padding: 3px;
 }
 textarea[title] {
   background-color: red;
   color: black;
+}
+
+#buttons {
+  margin: 3px 0;
 }
 
 /********************************/
@@ -58,9 +62,9 @@ textarea[title] {
   background: black;
   width: 640px;
   height: 360px;
-  margin: 10px auto;
+  margin: 5px auto;
   display: grid;
-  place-items: center right;
+  /* place-items: center right; */
 }
 
 /* These filter colors are temporary
@@ -80,7 +84,10 @@ textarea[title] {
   filter: invert(28%) sepia(77%) saturate(5957%) hue-rotate(121deg) brightness(90%) contrast(105%);
 }
 
-#voi1, #voi2 {
+#feu1 {place-self: center;}
+#feu2 {place-self: center;}
+
+#voie1, #voie2 {
   background: white;
   padding: 5px;
   width: 50%;
@@ -88,11 +95,21 @@ textarea[title] {
   height: 25px;
 }
 
+#voie1 {
+    flex-direction: row-reverse;
+}
+#voie2 {
+    place-self: center right;
+}
+
 #intersection {
   background: white;
   width: 100px;
   height: 100px;
   border-radius: 50%;
+  place-self: center center;
+  place-items: center center;
+  display: grid;
 }
 
 .vehicle {
@@ -101,6 +118,8 @@ textarea[title] {
   width: 50px;
   height: 25px;
   margin-left: 5px;
+  opacity: 1;
+  transition: opacity 1s;
 }
 
 /********************************/
