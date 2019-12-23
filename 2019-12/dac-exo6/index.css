@@ -67,21 +67,16 @@ textarea[title] {
   /* place-items: center right; */
 }
 
-/* These filter colors are temporary
- "CSS filter generator to convert from black to target hex color"
-  https://codepen.io/sosuke/pen/Pjoqqp
-*/
 .feu {
+  background-color: red;
+  background-image: url(images/traffic-lights-red.svg);
   width: 50px;
   height: 50px;
-  background-color: gray;
-  background-image: url(images/traffic-lights-red.svg);
   border-radius: 50%;
-  filter: invert(19%) sepia(100%) saturate(7475%) hue-rotate(360deg) brightness(108%) contrast(114%);
 }
 .feu.green {
   background-image: url(images/traffic-lights-green.svg);
-  filter: invert(28%) sepia(77%) saturate(5957%) hue-rotate(121deg) brightness(90%) contrast(105%);
+  background-color: yellowgreen;
 }
 
 #feu1 {place-self: center;}
@@ -102,7 +97,7 @@ textarea[title] {
     place-self: center right;
 }
 
-#intersection {
+#carrefour {
   background: white;
   width: 100px;
   height: 100px;
@@ -114,12 +109,31 @@ textarea[title] {
 
 .vehicle {
   background-color: black;
+  background-size: 75%;
+  background-position: center;
+  background-repeat: no-repeat;
   display: inline-block;
   width: 50px;
   height: 25px;
   margin-left: 5px;
   opacity: 1;
-  transition: opacity 1s;
+  transition: opacity 1s, margin 1s;
+}
+.car {background-image: url(images/city-car.svg);}
+.truck {background-image: url(images/truck.svg);}
+
+.traversee2 {
+  transform: rotateY(180deg);
+}
+
+.leaving {
+  opacity: 0;
+}
+.traversee1.leaving {
+  margin-right: -100px;
+}
+.traversee2.leaving {
+  margin-left: -100px;
 }
 
 /********************************/

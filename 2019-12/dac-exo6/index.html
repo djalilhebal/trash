@@ -109,13 +109,13 @@ v(sFeu)</textarea>
     </form>
 
     <div id="sim">
-      <span id="feu1" class="feu green"></span>
-      <div id="voie1"></div>
+      <span id="feu1" title="feu == 1" class="feu green"></span>
+      <div id="voie1" title="voie 1"></div>
 
-      <div id="intersection"></div>
+      <div id="carrefour" title="carrefour"></div>
 
-      <span id="feu2" class="feu"></span>
-      <div id="voie2"></div>
+      <span id="feu2" title="feu == 2" class="feu"></span>
+      <div id="voie2" title="voie 2"></div>
     </div>
 
   </main>
@@ -125,28 +125,20 @@ v(sFeu)</textarea>
     <pre>
     - *Must* write everything in French ._.
     
-    - Force user to declare 'feu' as `enum {1, 2}` (see the Problem section).
-
-    - If there's an error in (or an exception is raised from) a user's provided code, highlight the offending part and add an error message as a 'title' attribute.
+    - TODO: Force user to declare 'feu' as `enum {1, 2}` (see the Problem section).
 
     - Sorting each road's cars with multiple queues is tricky:
     create ordering priority depending on calls to p()
     like 'p(sFeu); p(sVide); ...' creates `orderVec=['sFeu', 'sVide']` that will be used to sort it in its road.
     - To pop or not to pop? Add both variants? Inform the user to pay attention?
     - pop is simple but bad if you use conditions. Similar problems happen if you don't pop...
-    - Instead of pop()'ing, replace sema with -Infinity?
     - p() unshift()s a val into orderVec?
     
     * Animation:
-    - Idea: just output states as JSON, and think of the actual rendering later?
-    - Using: https://developer.mozilla.org/en-US/docs/Web/CSS/order
     - Interesting: https://stackoverflow.com/questions/8123525/using-jquery-to-re-order-and-animate-list-items
 
-    - When a car leaves intersection, make it fade after some time then destroy its instance.
-
-    - If car touches intersection, make it yellow.
-
-    - If two cars collide, stop everything(!) and make the screen red(?)
+    - If a vehicle enters the intersection, make it gray(?)
+    - If two vehicles collide, stop everything(!) and make the screen red(?)
     </pre>
   </section>
 
@@ -156,6 +148,8 @@ v(sFeu)</textarea>
     Le carrefour ou le problème de la gestion des feux de circularion.
     La circulation au carrefour de deux voies est réglée par des signaux lumineux (feu vert/rouge).
     ...
+
+    Voir <a href="https://lipn.univ-paris13.fr/~fouquere/ENSEIGNEMENT/L2SR/TDTP_Systemes/td6.pdf">Exercice 2. Synchronisation : la circulation</a>
     </pre>
   </section>
   
@@ -164,9 +158,10 @@ v(sFeu)</textarea>
     <pre>
     * It makes use of:
       - JavaScript's `with` feature which is deprecated and very discouraged
-      - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AsyncFunction
+      - AsyncFunction: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AsyncFunction
+      - CSS order: https://developer.mozilla.org/en-US/docs/Web/CSS/order
       - <s>Lodash for some FP functions (mapping and zipping stuff...)</s>
-      - My Promise-based and queue-based semaphore [TBD] (find an implementation that supports `getPosition(obj)` and `getName()`, fork one, or write my own thing)
+      - SillySemaphore: My Promise-based and queue-based semaphore (to be improved or replace; find an implementation that supports `getPosition(this)` and maybe `getName()`, or fork one)
       - Phaser: a game engine [MAYBE] (for collusion detection and animation maybe)
 
     * Why?

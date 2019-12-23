@@ -96,7 +96,7 @@ class Exo6 {
       $feu2: $('#feu2'),
       $voie1: $('#voie1'),
       $voie2: $('#voie2'),
-      $intersection: $('#intersection'),
+      $carrefour: $('#carrefour'),
     })
 
     Exo6.ui.$form.onsubmit = (ev) => {
@@ -104,7 +104,7 @@ class Exo6 {
       Exo6.start();
     }
 
-    ui = Exo6.ui;
+    ui = Exo6.ui; // HACK
   }
   
   static loadUserInputs() {
@@ -137,19 +137,20 @@ class Exo6 {
   static initCreator() {
     Exo6.chan = new Changement();
 
-    // Maybe create an instance of Traversee every 3 secs
+    // Maybe create a new instance of Traversee every 2 secs
     Exo6.creatorInterval = setInterval(function maybeCreate() {
+      if (Math.random() < 0.5) return;
       const {voie1, voie2} = Exo6;
       if (Math.random() < 0.5) {
-        if (voie1.length < Traversee.MAX_PAR_VOI) {
+        if (voie1.length < Traversee.MAX_PAR_VOIE) {
           voie1.push( new Traversee1() );
         }
       } else {
-        if (voie2.length < Traversee.MAX_PAR_VOI) {
+        if (voie2.length < Traversee.MAX_PAR_VOIE) {
           voie2.push( new Traversee2() );
         }
       }
-    }, 3 * 1000);
+    }, 2 * 1000);
   }
 
   static initDrawer() {
@@ -230,7 +231,7 @@ class Algorithme {
     } else {
       await x.acquire(this);
     }
-    this.waitVec.shift(); // maybe?
+    //this.waitVec.shift(); // maybe?
   }
 
   async v(x) {
@@ -288,25 +289,25 @@ class Changement extends Algorithme {
 
 class Traversee extends Algorithme {
 
-  static MAX_PAR_VOI = 5;
-  static freeColors = 'blue coral darkkhaki green gray red skyblue teal orange pink purple yellow'.split(' ');
+  static MAX_PAR_VOIE = 5;
+  static freeColors = 'blue coral darkkhaki firebrick green gray skyblue teal orange pink purple yellow'.split(' ');
   // ...
 
   constructor(algoSource) {
     super(algoSource);
 
     this.color = this.getUniqueColor();
-    this.type = Math.random() < 0.2 ? 'truck' : 'car'; // 20% chance of being a truck
+    this.type = Math.random() < 0.25 ? 'truck' : 'car'; // 25% chance of being a truck
 
     this.$elem = document.createElement('span');
-    this.$elem.classList.add('vehicle', this.type);
+    this.$elem.classList.add('vehicle', this.type, this.source);
     this.$elem.style.backgroundColor = this.color;
-    this.$elem.style.order = '999'; // HACKS
+    this.$elem.style.order = '9999'; // HACK
   }
 
   async circuler() {
     // start moving
-    await this.sleep(1);
+    await this.sleep(Math.random());
 
     // cross(?) the intersection then "keep moving" and fade away...
     await this.enterIntersection();
@@ -316,14 +317,14 @@ class Traversee extends Algorithme {
   }
 
   async enterIntersection() {
-    Exo6.ui.$intersection.append(
+    Exo6.ui.$carrefour.append(
       this.$elem.parentNode.removeChild(this.$elem)
     )
     await this.sleep(1);
   }
 
   async leaveIntersection() {
-   this.$elem.style.opacity = '0';
+   this.$elem.classList.add('leaving');
    await this.sleep(1);
   }
 
@@ -340,6 +341,7 @@ class Traversee extends Algorithme {
   destroy() {
     Traversee.freeColors.push( this.color );
     this.$elem.remove();
+    // TODO Move to child classes
     // remove from the road's list
     if (this.source === 'traversee1') {
       Exo6.voie1.splice(Exo6.voie1.findIndex(t => t === this), 1);
