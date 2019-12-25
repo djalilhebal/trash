@@ -1,9 +1,18 @@
-// import { mapValues, zipObject } from './scripts/lodash.js';
 // import SillySemaphore as Sema from './scripts/semaphore.js';
 
 /**
  * @file DAC Exo6
  */
+
+/**
+ * @param {Array} arrA
+ * @param {Array} arrB
+ * @returns {Object}
+ */
+function zipObject(arrA, arrB) {
+  const zip = (arrX, arrY) => arrX.map((x, i) => [x, arrY[i]]);
+  return Object.fromEntries(zip(arrA, arrB));
+}
 
 /**
  * A Promise-based and queue-based Semaphore
@@ -47,8 +56,6 @@ const Sema = class SillySemaphore {
   }
 
 }
-
-const { mapValues, zipObject } = _; // Lodash
 
 // HACK: All refs to ui should really point directly to Exo6.ui
 let ui = null;
