@@ -158,30 +158,22 @@ class Exo6 {
 
   static initDrawer() {
     // HACK: Redraw every 1/4 sec
-    Exo6.drawerInterval = setInterval(Exo6.drawAll, 0.25 * 1000);
+    Exo6.drawerInterval = setInterval(Exo6.redraw, 0.25 * 1000);
   }
 
-  static drawAll() {
-    Exo6.drawFeu();
-    Exo6.drawVois();
-  }
+  static redraw() {
+    // Just update dataset and order values, and let CSS take care of the rest.
 
-  static drawFeu() {
-    // Let CSS take care of it
+    // Feu
     Exo6.ui.$sim.dataset.feu = Exo6.userVars.feu;
-  }
 
-  static drawVois() {
+    // Voies
     const {voie1, voie2} = Exo6;
     const tousTraversees = [...voie1, ...voie2];
-
-    // Update wait vector and use it to calculate order in line
-    for (const traversee of tousTraversees) {
-      traversee.$elem.style.order = traversee.getOrderVector().join('');
-    }
+    tousTraversees.sort(Traversee.makeSorter());
+    tousTraversees.forEach((t, i) => t.$elem.style.order = i);
   }
 
-  // TODO: rename to throwError(..)
   static showError(algoSource, message) {
     Exo6.ui[ '$' + algoSource ].setAttribute('title', message);
     Exo6.stop();
@@ -201,7 +193,7 @@ class Algorithme {
   constructor(algoSource) {
     this.algoSource = algoSource;
     this.userAlgo   = Exo6.userAlgos[algoSource];
-    this.waitVec    = Algorithme.parseOrderVector(this.userAlgo);
+    this.orderVec   = Algorithme.parseOrderVector(this.userAlgo);
   }
 
   async run() {
@@ -222,7 +214,7 @@ class Algorithme {
 
   async p(x) {
     await x.acquire(this);
-    //this.waitVec.shift(); // maybe?
+    //this.orderVec.shift(); // maybe?
   }
 
   async v(x) {
@@ -292,7 +284,7 @@ class Traversee extends Algorithme {
     this.$elem.classList.add('vehicle', this.type, this.algoSource);
     this.$elem.title = `${this.color} ${this.type} #${this.id}`;
     this.$elem.style.backgroundColor = this.color;
-    this.$elem.style.order = '9999'; // HACK
+    this.$elem.style.order = '9999'; // HACK needless?
   }
 
   async circuler() {
@@ -329,8 +321,11 @@ class Traversee extends Algorithme {
     }
   }
   
-  getOrderVector() {
-    const vec = this.waitVec.map(semaName => Exo6.userVars[semaName].getPosition(this) );
+  /**
+   * @returns {Array<number>}
+   */
+  getWaitVec() {
+    const vec = this.orderVec.map(semaName => Exo6.userVars[semaName].getPosition(this));
     return vec;
   }
 
@@ -345,6 +340,7 @@ class Traversee extends Algorithme {
   destroy() {
     Traversee.freeColors.push( this.color );
     this.$elem.remove();
+    
     // TODO Move to child classes
     // remove from the road's list
     if (this.algoSource === 'traversee1') {
@@ -354,6 +350,46 @@ class Traversee extends Algorithme {
     }
   }
 
+  /**
+   * Create a compare function for Traversee, with memoization support
+   * @returns {(a: Traversee, b: Traversee) => number}
+   */
+  static makeSorter() {
+    const memoizedVecs = new WeakMap();
+    
+    function getVecOf(t) {
+      if (!memoizedVecs.has(t)) {
+        memoizedVecs.set(t, t.getWaitVec());
+      }
+      return memoizedVecs.get(t);
+    }
+  
+    /**
+     * Sort wait vecs in an ascending order
+     * 
+     * @param {Array<number>} vecA 
+     * @param {Array<number>} vecB 
+     * @returns {number}
+     */
+    function compareVecs(vecA, vecB) {
+      for (let i = 0; i < vecA.length; i++) {
+        if (vecA[i] - vecB[i] !== 0) {
+          return vecA[i] - vecB[i];
+        }
+      }
+      return 0;
+    }
+  
+    function compareTraversees(a, b) {
+      return compareVecs(
+        getVecOf(a),
+        getVecOf(b)
+      )
+    }
+  
+    return compareTraversees;
+  }
+  
 }
 
 
