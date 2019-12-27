@@ -73,14 +73,19 @@ textarea[title] {
   width: 50px;
   height: 50px;
   border-radius: 50%;
+  place-self: center;
 }
-.feu.green {
+#sim[data-feu="0"] .feu {
+  background-color: gray !important;
+}
+#sim[data-feu="1"] #feu1 {
   background-image: url(images/traffic-lights-green.svg);
   background-color: yellowgreen;
 }
-
-#feu1 {place-self: center;}
-#feu2 {place-self: center;}
+#sim[data-feu="2"] #feu2 {
+  background-image: url(images/traffic-lights-green.svg);
+  background-color: yellowgreen;
+}
 
 #voie1, #voie2 {
   background: white;
@@ -108,14 +113,15 @@ textarea[title] {
 }
 
 .vehicle {
+  width: 50px;
+  height: 25px;
+  display: inline-block;
   background-color: black;
   background-size: 75%;
   background-position: center;
   background-repeat: no-repeat;
-  display: inline-block;
-  width: 50px;
-  height: 25px;
-  margin-left: 5px;
+  background-position: 50% 25%;
+  margin: 0 1px;
   opacity: 1;
   transition: opacity 1s, margin 1s;
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -37,7 +37,7 @@
           <tr>
             <td>
 <textarea id="changement">while (true) {
-  sleep(15)
+  sleep(10)
   if (feu == 1) {
     p(sFeu1)
     feu = 2
@@ -48,54 +48,22 @@
     v(sFeu1)
   }
 }</textarea>
-          </td>
-          <td>
+            </td>
+            <td>
 <textarea id="traversee1">p(sVide1)
 p(sFeu1)
 circuler()
 v(sFeu1)
 v(sVide1)</textarea>
-          </td>
-          <td>
+            </td>
+            <td>
 <textarea id="traversee2">p(sVide2)
 p(sFeu2)
 circuler()
 v(sFeu2)
 v(sVide2)</textarea>
-      </td>
-</tr>
-<!--<tr>
-            <td>
-<textarea" id="changement">while (true) {
-  sleep(10)
-  p(sFeu)
-  if (feu == 1) {
-    feu = 2
-  } else {
-    feu = 1
-  }
-  v(sFeu)
-}</textarea>
-          </td>
-          <td>
-<textarea id="traversee1">p(sFeu)
-if (feu == 1) {
-  p(sVide)
-  circuler()
-  v(sVide)
-}
-v(sFeu)</textarea>
-          </td>
-          <td>
-<textarea id="traversee2">p(sFeu)
-if (feu == 2) {
-  p(sVide)
-  circuler()
-  v(sVide)
-}
-v(sFeu)</textarea>
-      </td>
-</tr>-->
+            </td>
+          </tr>
         </table>
 
         <div id="buttons">
@@ -108,7 +76,7 @@ v(sFeu)</textarea>
       </fieldset>
     </form>
 
-    <div id="sim">
+    <div id="sim" data-feu="0">
       <span id="feu1" title="feu == 1" class="feu green"></span>
       <div id="voie1" title="voie 1"></div>
 
@@ -123,8 +91,6 @@ v(sFeu)</textarea>
   <section>
     <h2>Ideas...</h2>
     <pre>
-    - *Must* write everything in French ._.
-    
     - TODO: Force user to declare 'feu' as `enum {1, 2}` (see the Problem section).
 
     - Sorting each road's cars with multiple queues is tricky:
@@ -134,9 +100,6 @@ v(sFeu)</textarea>
     - pop is simple but bad if you use conditions. Similar problems happen if you don't pop...
     - p() unshift()s a val into orderVec?
     
-    * Animation:
-    - Interesting: https://stackoverflow.com/questions/8123525/using-jquery-to-re-order-and-animate-list-items
-
     - If a vehicle enters the intersection, make it gray(?)
     - If two vehicles collide, stop everything(!) and make the screen red(?)
     </pre>
@@ -145,12 +108,13 @@ v(sFeu)</textarea>
   <section>
     <h2>Problem / Exo</h2>
     <pre>
+    FOR FRENCH: Voir <a href="https://lipn.univ-paris13.fr/~fouquere/ENSEIGNEMENT/L2SR/TDTP_Systemes/td6.pdf">Exercice 2. Synchronisation : la circulation</a>
+
     Le carrefour ou le problème de la gestion des feux de circularion.
     La circulation au carrefour de deux voies est réglée par des signaux lumineux (feu vert/rouge).
     ...
-
-    Voir <a href="https://lipn.univ-paris13.fr/~fouquere/ENSEIGNEMENT/L2SR/TDTP_Systemes/td6.pdf">Exercice 2. Synchronisation : la circulation</a>
-    </pre>
+    For simplicity, we are using two one-lane roads
+  </pre>
   </section>
   
   <section>
@@ -183,7 +147,7 @@ v(sFeu)</textarea>
     <h2>Refs</h2>
     <pre>
     - B. P. Miller, <i>What to Draw? When to Draw? An Essay on Parallel Program Visualization</i>
-    - Wikipedia, Queueing Theory, networks and network jams
+    - Wikipedia, <i>Queueing Theory</i>
     </pre>
   </section>
 

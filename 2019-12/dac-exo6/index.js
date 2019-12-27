@@ -26,7 +26,8 @@ const Sema = class SillySemaphore {
   }
 
   getPosition(requester) {
-    return this._queue.findIndex(entry => entry.requester === requester);
+    const idx = this._queue.findIndex(entry => entry.requester === requester);
+    return idx + 1; // to get rid of '-1'
   }
 
   async acquire(requester) {
@@ -56,9 +57,6 @@ const Sema = class SillySemaphore {
   }
 
 }
-
-// HACK: All refs to ui should really point directly to Exo6.ui
-let ui = null;
 
 class Exo6 {
 
@@ -94,11 +92,11 @@ class Exo6 {
     Object.assign(Exo6.ui, {
       $form: $('form'),
       $fieldset: $('form fieldset'),
-
       $changement: $('#changement'),
       $traversee1: $('#traversee1'),
       $traversee2: $('#traversee2'),
 
+      $sim: $('#sim'),
       $feu1: $('#feu1'),
       $feu2: $('#feu2'),
       $voie1: $('#voie1'),
@@ -110,13 +108,13 @@ class Exo6 {
       ev.preventDefault();
       Exo6.start();
     }
-
-    ui = Exo6.ui; // HACK
   }
   
   static loadUserInputs() {
+    const {ui} = Exo6;
+
     // userAlgos...
-    Object.assign(Exo6.userAlgos, 
+    Object.assign(Exo6.userAlgos,
       {
         changement: ui.$changement.value,
         traversee1: ui.$traversee1.value,
@@ -161,7 +159,7 @@ class Exo6 {
   }
 
   static initDrawer() {
-    // Redraw every half a sec
+    // HACK: Redraw every 1/4 sec
     Exo6.drawerInterval = setInterval(Exo6.drawAll, 0.25 * 1000);
   }
 
@@ -171,13 +169,8 @@ class Exo6 {
   }
 
   static drawFeu() {
-    if (Exo6.userVars.feu == 1) {
-      ui.$feu1.classList.add('green');
-      ui.$feu2.classList.remove('green'); // set red
-    } else {
-      ui.$feu2.classList.add('green');
-      ui.$feu1.classList.remove('green'); // set red
-    }
+    // Let CSS take care of it
+    Exo6.ui.$sim.dataset.feu = Exo6.userVars.feu;
   }
 
   static drawVois() {
@@ -190,12 +183,14 @@ class Exo6 {
     }
   }
 
-  static showError(target, message) {
-    ui[ '$' + target ].setAttribute('title', message);
+  // TODO: rename to throwError(..)
+  static showError(algoSource, message) {
+    Exo6.ui[ '$' + algoSource ].setAttribute('title', message);
+    Exo6.stop();
   }
 
   static clearErrors() {
-    ui.$form.querySelectorAll('[title]').forEach($x => $x.removeAttribute('title'));
+    Exo6.ui.$form.querySelectorAll('[title]').forEach($x => $x.removeAttribute('title'));
   }
 
 }
@@ -203,19 +198,16 @@ class Exo6 {
 class Algorithme {
 
   /**
-   * @param {String} source - "changement", "traversee1", or "traversee2"
+   * @param {String} algoSource - "changement", "traversee1", or "traversee2"
    */
-  constructor(source) {
-    this.source   = source;
-    this.userAlgo = Exo6.userAlgos[source];
-    this.waitVec  = Algorithme.parseOrderVector(this.userAlgo);
+  constructor(algoSource) {
+    this.algoSource = algoSource;
+    this.userAlgo   = Exo6.userAlgos[algoSource];
+    this.waitVec    = Algorithme.parseOrderVector(this.userAlgo);
   }
 
   async run() {
     const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
-    const getErrorLineNum = e => Number( e.stack.match(/:(\d+):\d+\)?$/m)[1] );
-    const referenceLineNum = getErrorLineNum(new Error());
-    const userStartLineNum = referenceLineNum + 6;
     try {
       await new AsyncFunction('that', `
       with (that) {
@@ -225,28 +217,18 @@ class Algorithme {
       }
       `)(this);
     } catch (userError) {
-      console.warn(userError)
-      const relativeLineNum = getErrorLineNum(userError) - userStartLineNum;
-      const relativeMessage = `${relativeLineNum}: ${userError.message}`;
-      Exo6.showError(this.source, relativeMessage);
+      console.error('userError', userError);
+      Exo6.showError(this.algoSource, userError.message);
     }
   }
 
   async p(x) {
-    if (typeof x === 'string') {
-      await Exo6.userVars[x].acquire(this);
-    } else {
-      await x.acquire(this);
-    }
+    await x.acquire(this);
     //this.waitVec.shift(); // maybe?
   }
 
   async v(x) {
-    if (typeof x === 'string') {
-      await Exo6.userVars[x].release(this);
-    } else {
-      await x.release(this);
-    }
+    await x.release(this);
   }
 
   async sleep(secs) {
@@ -268,15 +250,14 @@ class Algorithme {
    * A vehicle's place in line is determined by a vector of priorities
    * which are based on calls to p(...)
    * 
-   * @todo Dedup before returning?
-   * @todo Handle whitespace?
+   * @todo Should dedup before returning?
    * 
    * @param {string} code
    * @return {Array<string>}
    */
   static parseOrderVector(code) {
-    const pCalls = code.match(/p\((\w+)\)/g) || [];
-    const acquiredSemaphores = pCalls.map(x => x.slice(2, -1));
+    const pCalls = code.match(/\bp\(\s*(\w+)\s*\)/g) || [];
+    const acquiredSemaphores = pCalls.map(x => x.slice(2, -1).trim());
     return acquiredSemaphores;
   }
 
@@ -297,17 +278,21 @@ class Changement extends Algorithme {
 class Traversee extends Algorithme {
 
   static MAX_PAR_VOIE = 5;
+  static count = 0;
   static freeColors = 'blue coral darkkhaki firebrick green gray skyblue teal orange pink purple yellow'.split(' ');
-  // ...
 
   constructor(algoSource) {
     super(algoSource);
 
+    this.id = this.getUniqueId();
     this.color = this.getUniqueColor();
     this.type = Math.random() < 0.25 ? 'truck' : 'car'; // 25% chance of being a truck
 
+    // TODO Move to dedicated method?
+    // TODO Stop replying on .traversee1 and .traversee2 (.<algoSource>)
     this.$elem = document.createElement('span');
-    this.$elem.classList.add('vehicle', this.type, this.source);
+    this.$elem.classList.add('vehicle', this.type, this.algoSource);
+    this.$elem.title = `${this.color} ${this.type} #${this.id}`;
     this.$elem.style.backgroundColor = this.color;
     this.$elem.style.order = '9999'; // HACK
   }
@@ -336,11 +321,14 @@ class Traversee extends Algorithme {
   }
 
   getOrderVector() {
-    const indexes = this.waitVec.map(semaName => Exo6.userVars[semaName].getPosition(this) );
-    const vec = indexes.map(i => i + 1); // to get rid of '-1' values
+    const vec = this.waitVec.map(semaName => Exo6.userVars[semaName].getPosition(this) );
     return vec;
   }
 
+  getUniqueId() {
+    return (++Traversee.count).toString(36).toUpperCase();
+  }
+  
   getUniqueColor() {
     return Traversee.freeColors.shift();
   }
@@ -350,7 +338,7 @@ class Traversee extends Algorithme {
     this.$elem.remove();
     // TODO Move to child classes
     // remove from the road's list
-    if (this.source === 'traversee1') {
+    if (this.algoSource === 'traversee1') {
       Exo6.voie1.splice(Exo6.voie1.findIndex(t => t === this), 1);
     } else {
       Exo6.voie2.splice(Exo6.voie2.findIndex(t => t === this), 1);
@@ -364,7 +352,7 @@ class Traversee1 extends Traversee {
 
   constructor() {
     super('traversee1');
-    ui.$voie1.append(this.$elem);
+    Exo6.ui.$voie1.append(this.$elem);
     this.run();
   }
 
@@ -375,7 +363,7 @@ class Traversee2 extends Traversee {
 
   constructor() {
     super('traversee2');
-    ui.$voie2.append(this.$elem);
+    Exo6.ui.$voie2.append(this.$elem);
     this.run();
   }
 
