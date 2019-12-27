@@ -70,7 +70,7 @@ textarea[title] {
   position: relative;
 }
 
-.feu {
+#feu1, #feu2 {
   background-color: red;
   background-image: url(images/traffic-lights-red.svg);
   width: 50px;
@@ -79,7 +79,7 @@ textarea[title] {
   position: absolute !important;
   border-radius: 50%;
 }
-#sim[data-feu="0"] .feu {
+#sim[data-feu="0"] #feu1, #sim[data-feu="0"] #feu2 {
   background-color: gray !important;
 }
 #sim[data-feu="1"] #feu1 {
@@ -133,6 +133,9 @@ textarea[title] {
   left: 158px;
   z-index: 2;
 }
+#carrefour[data-state="collision"] {
+  background: radial-gradient(red, transparent);
+}
 
 .vehicle {
   width: 48px;
@@ -145,24 +148,23 @@ textarea[title] {
   opacity: 1;
   transition: opacity 1s, margin 1s;
 }
-.car {background-image: url(images/city-car.svg);}
-.truck {background-image: url(images/truck.svg);}
+.car { background-image: url(images/city-car.svg); }
+.truck { background-image: url(images/truck.svg); }
 
-.traversee1 {
-  transform: rotateZ(90deg);
-}
+.traversee1 { transform: rotateZ(90deg); }
+.traversee2 { transform: rotateY(180deg); }
 
 .traversee2 {
   transform: rotateY(180deg);
 }
 
-.leaving {
+#carrefour[data-state="normal"] .vehicle[data-state="leaving"] {
   opacity: 0;
 }
-.traversee1.leaving {
+#carrefour[data-state="normal"] .traversee1[data-state="leaving"] {
   margin-bottom: -150px;
 }
-.traversee2.leaving {
+#carrefour[data-state="normal"] .traversee2[data-state="leaving"] {
   margin-left: -150px;
 }
 

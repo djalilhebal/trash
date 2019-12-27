@@ -1,5 +1,3 @@
-// import SillySemaphore as Sema from './scripts/semaphore.js';
-
 /**
  * @file DAC Exo6
  */
@@ -277,7 +275,7 @@ class Changement extends Algorithme {
 
 class Traversee extends Algorithme {
 
-  static MAX_PAR_VOIE = 5;
+  static MAX_PAR_VOIE = 4;
   static count = 0;
   static freeColors = 'blue coral darkkhaki firebrick green gray skyblue teal orange pink purple yellow'.split(' ');
 
@@ -301,25 +299,36 @@ class Traversee extends Algorithme {
     // start moving
     await this.sleep(Math.random());
 
-    // cross(?) the intersection then "keep moving" and fade away...
+    // cross the intersection then "keep moving" and fade away...
     await this.enterIntersection();
     await this.leaveIntersection();
-
-    this.destroy();
   }
 
   async enterIntersection() {
     Exo6.ui.$carrefour.append(
       this.$elem.parentNode.removeChild(this.$elem)
     )
+    this.checkCollision();
     await this.sleep(1);
   }
 
   async leaveIntersection() {
-   this.$elem.classList.add('leaving');
-   await this.sleep(1);
+    this.$elem.dataset.state = 'leaving';
+    await this.sleep(1);
+    this.checkCollision();
+    this.destroy();
   }
 
+  checkCollision() {
+    const $c = Exo6.ui.$carrefour;
+    const happened = $c.children.length > 1;
+    if (happened) {
+      // state = enum {'normal', 'collision'}
+      $c.dataset.state = 'collision';
+      throw new Error('Collision!');
+    }
+  }
+  
   getOrderVector() {
     const vec = this.waitVec.map(semaName => Exo6.userVars[semaName].getPosition(this) );
     return vec;
