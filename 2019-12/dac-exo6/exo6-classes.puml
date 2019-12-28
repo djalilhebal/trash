@@ -1,0 +1,65 @@
+@startuml Exo6
+
+class Sim {
+  # {static} userVars: Map<String, number | Semaphore>
+  # {static} userAlgos: Map<String, String>
+  # {static} ui: Map<String, HTMLElement>
+  
+  # {static} chan: Changement
+  # {static} voie1: Array<Traversee1>
+  # {static} voie2: Array<Traversee2>
+  
+  + {static} start()
+  + {static} stop()
+  - {static} setup()
+  - {static} redraw()
+}
+
+class Algorithme {
+  - userAlgo: String
+  - orderVec: Array<String>
+
+  + p(x: Semaphore)
+  + v(x: Semaphore)
+  + sleep(secs: number)
+
+  - run()
+  - {static} awaitify(code: String): String
+  - {static} parseOrderVector(code: String): Array<String>
+  ~ getWaitVec(): Array<number>
+}
+
+
+class Changement {
+
+}
+
+class Traversee {
+  - color: String
+  - type: String
+  - id: String
+  
+  + circuler()
+  - assertNoCollision()
+  - destroy()
+  - getUniqueColor(): String
+}
+class Traversee1 {}
+class Traversee2 {}
+
+class SillySemaphore {
+  - permits: number
+  - queue: Array<Object>
+  
+  + acquire(): Promise
+  + release(): Promise
+  + getPosition(requester: Object): number
+}
+
+Sim *--right Algorithme
+Algorithme ..> SillySemaphore
+Algorithme <|-- Changement
+Algorithme <|-- Traversee
+Traversee <|-- Traversee1
+Traversee <|-- Traversee2
+@enduml

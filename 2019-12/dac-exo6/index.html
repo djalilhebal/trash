@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <link href="index.css" rel="stylesheet" />
-  <title>DAC Exo6</title>
+  <title>DAC Exo6: La Circulation</title>
 </head>
 <body>
   <header>
-    <h1>DAC Exo6</h1>
-    <p class="subtitle">#Animation #Simulation #WIP</p>
+    <h1>DAC Exo6: La Circulation</h1>
+    <p class="subtitle">#Simulation #Animation #prototype</p>
   </header>
   <main>
     <form autocomplete="off" spellcheck="false">
@@ -36,8 +36,8 @@
           </tr>
           <tr>
             <td>
-<textarea id="changement">while (true) {
-  sleep(10)
+<textarea id="changement">while (1) {
+  sleep(15)//durée~
   if (feu == 1) {
     p(sFeu1)
     feu = 2
@@ -93,46 +93,64 @@ v(sVide2)</textarea>
     <pre>
     - TODO: Force user to declare 'feu' as `enum {1, 2}` (see the Problem section).
 
-    - Sorting each road's cars with multiple queues is tricky:
-    create ordering priority depending on calls to p()
-    like 'p(sFeu); p(sVide); ...' creates `orderVec=['sFeu', 'sVide']` that will be used to sort it in its road.
-    - To pop or not to pop? Add both variants? Inform the user to pay attention?
-    - pop is simple but bad if you use conditions. Similar problems happen if you don't pop...
-    - p() unshift()s a val into orderVec?
-    
-    - If a vehicle enters the intersection, make it gray(?)
-    - If two vehicles collide, stop everything(!) and make the screen red(?)
-    </pre>
+    - Warning: Because the whole system is based on Promises and not actual threads, you will need to use <code>sleep(0)</code> if you're going to use an "active wait" loop of some kind.
+    (for an example, see the code of <a href="./presets.js">my attempt</a>)
+
+    - Warning: Keep this in mind: Sorting each road's cars with multiple dynamic queues (Semaphores) is tricky:
+    The ordering priority I used depends on calls to p(...)
+    like 'p(sFeu); p(sVide); ...' creates `orderVec=['sFeu', 'sVide']` that will be used to sort each vehicle.
+
+    - TODO: Draw using <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element/svg">SVG</a> and animate using <a href="https://svgjs.com/">SVG.js</a>.
+    - TODO: Maybe use the Phaser game engine for collision detection and animation.
+  </pre>
   </section>
 
   <section>
     <h2>Problem / Exo</h2>
     <pre>
-    FOR FRENCH: Voir <a href="https://lipn.univ-paris13.fr/~fouquere/ENSEIGNEMENT/L2SR/TDTP_Systemes/td6.pdf">Exercice 2. Synchronisation : la circulation</a>
+    EN FRANÇAIS: <a href="https://lipn.univ-paris13.fr/~fouquere/ENSEIGNEMENT/L2SR/TDTP_Systemes/td6.pdf">Exercice 2. Synchronisation : la circulation</a> (<a href="https://web.archive.org/web/20191228014022/https://lipn.univ-paris13.fr/~fouquere/ENSEIGNEMENT/L2SR/TDTP_Systemes/td6.pdf">#archivé</a>)
 
-    Le carrefour ou le problème de la gestion des feux de circularion.
-    La circulation au carrefour de deux voies est réglée par des signaux lumineux (feu vert/rouge).
-    ...
-    For simplicity, we are using two one-lane roads
+
+    <b>Traffic Lights:</b>
+    At an intersection, traffic is controlled/<i>minajjed</i> by traffic lights.
+
+    Rules:
+    - The intersection can contain at most one vehicle.
+    - Vehicles arrive at both roads in a random manner.
+    - Traffic lights of each road periodically change color (red or green), and hold that color for a finite period of time.
+    - The traffic lights controller (Changement) should wait for the current vehicle at the intersection to leave before changing lights.
+
+    For the sake of simplicity, we assume that:
+    - it is an intersection of two one-lane roads
+    - vehicles don't change direction, and keep moving in a straight line
+
+    This system can be modeled as a set of parallel processes:
+    - A process <b>P</b> that executes the Changement procedure which handles both traffic lights.
+    - A process for each vehicle (Traversee<sub>i</sub> if on voie<sub>i</sub>; where i = {1, 2})
+    - Traffic light of voie<sub>i</sub> is green if <code>feu == i</code>.
+
+    Write <b>Changement</b>, as well as the <b>Traversee1</b> and <b>Traversee2</b> procedures to synchronize the system using semaphores.
+
+    Gambatte~
   </pre>
   </section>
   
   <section>
     <h2>Notes</h2>
     <pre>
+    This web app is supposed be <em>useful</em> (as in [2]) to students, so they can actually test their procedures and learn how they work in a dynamic system
+    and not just a viz like I did with <a href="https://dreamski21.github.io/trash/2019-11/dac-exo3/?scenario=p1,p2,p3">DAC Exo3</a>.
+    
+    * Why? Why not. Also, because the idea of simulating a dynamic system sounded cool (my DAC teacher mentioned it).
+
     * It makes use of:
-      - JavaScript's `with` feature which is deprecated and very discouraged
-      - AsyncFunction: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AsyncFunction
-      - CSS order: https://developer.mozilla.org/en-US/docs/Web/CSS/order
-      - SillySemaphore: My Promise-based and queue-based semaphore (to be improved or replace; find an implementation that supports `getPosition(this)` and maybe `getName()`, or fork one)
-      - Phaser: a game engine [MAYBE] (for collision detection and animation maybe)
+      - JavaScript's <code>with</code> feature which is deprecated and very discouraged
+      - <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AsyncFunction">AsyncFunction</a>
+      - SillySemaphore: My stupid Promise-based and queue-based semaphore
+      - <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/order">CSS order</a>
+      - <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/transition">CSS transition</a>
 
-    * Why?
-      - To learn Phaser(?)
-      - To practice DAC(?)
-
-    * Tested with Brave Browser v1.1 (Chromium v79.0)
-    * NOTE: Performance does not matter; if anything, we want to make things slower!
+    * Developed and tested with <a href="https://brave.com/dre744">Brave Browser</a> v1.1 (Chromium v79.0)
     </pre>
   </section>
 
@@ -145,9 +163,21 @@ v(sVide2)</textarea>
   
   <section>
     <h2>Refs</h2>
+    These are some of the cool documents and topics I checked while making this...<br />
     <pre>
-    - B. P. Miller, <i>What to Draw? When to Draw? An Essay on Parallel Program Visualization</i>
-    - Wikipedia, <i>Queueing Theory</i>
+    - [1]: Shene, <i>ThreadMentor: A Pedagogical Tool for Multithreaded Programming</i> (<a href="https://pages.mtu.edu/~shene/NSF-3/e-Book/index.html">tutorial</a>)
+    - [2]: B. P. Miller, <i>What to Draw? When to Draw? An Essay on Parallel Program Visualization</i>
+
+    - Wikipedia, <i>Queueing theory</i>
+    - Wikipedia, <a href="https://en.wikipedia.org/wiki/Taxicab_geometry">Taxicab geometry</a>
+
+    - Wikipedia, <i>Computer simulation</i>
+    - Wikipedia, <i>Web-based simulation</i>
+    - Wikipedia, <i>Discrete-event simulation</i>
+    - SIM.JS <a href="https://en.wikipedia.org/wiki/SIM.JS">on Wikipedia</a>, <a hred="http://simjs.com/index.html">its website</a>
+
+    - <a href="http://bit-player.org/2015/traffic-jams-in-javascript">Traffic Jams in Javascript | bit-player</a>
+    - <a href="https://www.ted.com/talks/wanis_kabbaj_what_a_driverless_world_could_look_like">Wanis Kabbaj: What a driverless world could look like | TED Talk</a>
     </pre>
   </section>
 
