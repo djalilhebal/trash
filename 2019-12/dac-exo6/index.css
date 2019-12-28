@@ -8,57 +8,175 @@ body {
   text-align: center;
 }
 
-table {
-  margin: auto;
-  background: white;
+code {
+  font-style: italic;
+}
+
+/********************************/
+
+form {
+  background: lightgray;
 }
 
 fieldset {
   border: 0px;
 }
 
-form {
-  background: lightgray;
-  padding: 10px;
+table {
+  background: white;
+  margin: auto;
 }
 
 #user-vars {
-  text-align: left;
   background: white;
-  padding: 10px;
+  text-align: left;
+  padding: 5px;
+  margin: 5px;
   line-height: 2;
   font-size: 17px;
 }
 
 #user-vars input {
+  color: darkblue;
+  font-size: 17px;
   border: 0;
   border-bottom: 2px dashed black;
-  font-size: 17px;
   outline: none;
-  color: darkblue;
 }
 
 textarea {
-  outline: none;
-  height: 125px;
   color: darkblue;
+  height: 150px;
+  outline: none;
+  padding: 3px;
 }
 textarea[title] {
   background-color: red;
   color: black;
 }
 
-/* itchio uses 640x360 by default */
-#sim {
-  background: black;
-  width: 640px;
-  height: 360px;
-  margin: auto;
+#buttons {
+  margin: 3px 0;
 }
 
+/********************************/
+
+/* itch.io uses 640x360 by default */
+#sim {
+  width: 640px;
+  height: 360px;
+  background: black;
+  border: 2px dashed white;
+  margin: 5px auto;
+}
+
+#sim > * {
+  position: relative;
+}
+
+#feu1, #feu2 {
+  background-color: red;
+  background-image: url(images/traffic-lights-red.svg);
+  width: 50px;
+  height: 50px;
+  display: inline-block;
+  position: absolute !important;
+  border-radius: 50%;
+}
+#sim[data-feu="0"] #feu1, #sim[data-feu="0"] #feu2 {
+  background-color: gray !important;
+}
+#sim[data-feu="1"] #feu1 {
+  background-image: url(images/traffic-lights-green.svg);
+  background-color: yellowgreen;
+}
+#sim[data-feu="2"] #feu2 {
+  background-image: url(images/traffic-lights-green.svg);
+  background-color: yellowgreen;
+}
+
+#feu1 {
+  margin-top: 75px;
+  margin-left: -195px;
+}
+
+#feu2 {
+  margin-top: 75px;
+}
+
+#voie1, #voie2 {
+  background: white;
+  padding: 5px;
+  display: flex;
+  z-index: 1;
+}
+
+#voie1 {
+  flex-direction: column-reverse;
+  width: 48px;
+  height: 205px;
+  position: absolute;
+  margin-left: 180px;
+  padding-bottom: 150px;
+}
+#voie2 {
+  height: 48px;
+  top: 130px;
+  width: 380px;
+  padding-left: 255px;
+}
+
+#carrefour {
+  background: white;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  place-items: center center;
+  display: grid;
+  top: 210px;
+  left: 158px;
+  z-index: 2;
+}
+#carrefour[data-state="collision"] {
+  background: radial-gradient(red, transparent);
+}
+
+.vehicle {
+  width: 48px;
+  height: 48px;
+  display: inline-block;
+  background-color: black;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin: 2px;
+  opacity: 1;
+  transition: opacity 2s, margin 1s;
+}
+.car { background-image: url(images/city-car.svg); }
+.truck { background-image: url(images/truck.svg); }
+
+.traversee1 { transform: rotateZ(90deg); }
+.traversee2 { transform: rotateY(180deg); }
+
+.traversee2 {
+  transform: rotateY(180deg);
+}
+
+#carrefour[data-state="normal"] .vehicle[data-state="leaving"] {
+  opacity: 0;
+}
+#carrefour[data-state="normal"] .traversee1[data-state="leaving"] {
+  margin-bottom: -150px;
+}
+#carrefour[data-state="normal"] .traversee2[data-state="leaving"] {
+  margin-left: -150px;
+}
+
+/********************************/
+
 section {
-  text-align: left;
   background: lightgray;
+  text-align: left;
   margin: 5px;
   padding: 10px;
 }

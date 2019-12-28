@@ -2,259 +2,428 @@
  * @file DAC Exo6
  */
 
- /**
- * It must be a Promise-based Semaphore that uses a queue
- *
- * - Must I pass `obj` to acquire() and release()?
+/**
+ * @param {Array} arrA
+ * @param {Array} arrB
+ * @returns {Object}
  */
-class Sema {
+function zipObject(arrA, arrB) {
+  const zip = (arrX, arrY) => arrX.map((x, i) => [x, arrY[i]]);
+  return Object.fromEntries(zip(arrA, arrB));
+}
+
+/**
+ * A Promise-based and queue-based Semaphore
+ * @todo maybe fork or learn from https://github.com/zeit/async-sema
+ */
+const Semaphore = class SillySemaphore {
+
   constructor(permits) {
-    this.permits = permits;
-    this.queue = [];
+    this._permits = permits;
+    this._queue = [];
   }
 
-  getPosition(targetObj) {
-    return this.queue.findIndex(obj => obj === targetObj);
+  getPosition(requester) {
+    const idx = this._queue.findIndex(entry => entry.requester === requester);
+    return idx + 1; // to get rid of '-1'
   }
 
-}
-
-/**
- * 
- * @example
- * assert({
- *  given: 'two arrays'
- *  should: 'pair each element with its peer',
- *  expected: [ ['a', 1], ['b', 2] ],
- *  actual: zip(['a', 'b'], [1, 2]),
- * })
- * 
- * @param {Array} arrA 
- * @param {Array} arrB 
- * @returns {Array}
- */
-const zip = (arrA, arrB) => arrA.map((x, i) => [ x, arrB[i] ]);
-
-/**
- * Prefix "p", "v", and "circuler" with the `await` keyword
- * 
- * @example
- * assert({
- *   given: 'a piece of code',
- * 
- *   should: 'prefix "p", "v", and "circuler" with "await"',
- *
- *   expected: `
- *   if (feu == 2) {
- *     await p(sVide)
- *     await p(sFeu)
- *     await circuler()
- *     await v(sVide)
- *   }
- *   await v(sFeu)`,
- *
- *   actual: awaitify(`if (feu == 2) {
- *     p(sVide)
- *     circuler()
- *     v(sVide)
- *   }
- *   v(sFeu)`),
- * })
- * 
- * @param {string} code
- * @returns {string}
- */
-function awaitify(code) {
-  return code.replace(/\b(p|v|circuler)\(/g, 'await $1(');
-}
-
-/**
- * A car's place in line is determined by a vector of priorities
- * 
- * @todo Dedup before returning
- * @todo Handle whitespace?
- * 
- * @param {string} code
- * @return {Array<string>}
- */
-function getOrderVector(code) {
-  const pCalls = code.match(/p\((\w+)\)/g) || [];
-  const acquiredSemaphores = pCalls.map(x => x.slice(2, -1))
-  return acquiredSemaphores
-}
-
-const $ = str => document.querySelector(str);
-
-// caching 'select queries' kinda
-const ui = {
-  $form: $('form'),
-
-  $changement: $('#changement'),
-  $traversee1: $('#traversee1'),
-  $traversee2: $('#traversee2'),
-}
-
-ui.$form.onsubmit = (ev) => {
-  ev.preventDefault();
-  // - Collect user defined stuff (userAlgos, userVecs, userVars)
-  // - Do a test sim to assert that 'userAlgos' don't throw when 'eval()'ed;
-  //  else abort and alert user.
-  // - Run actual sim
-}
-
-const userAlgos = {
-  changement: awaitify(ui.$changement.value),
-  traversee1: awaitify(ui.$traversee1.value),
-  traversee2: awaitify(ui.$traversee2.value),
-}
-
-// TODO: just map over the userAlgos object
-const userVecs = {
-  changement: getOrderVector(userAlgos.changement),
-  traversee1: getOrderVector(userAlgos.traversee1),
-  traversee2: getOrderVector(userAlgos.traversee2),
-}
-
-const userVars = {};
-{
-  const formData = new FormData(ui.$form);
-  const SEP = /,\s*/; // separator
-
-  const userSemas = Object.fromEntries(zip(
-    formData.get('sema-names').split(SEP),
-    formData.get('sema-vals').split(SEP).map(val => new Sema(Number(val)))
-  ));
-
-  const userInts = Object.fromEntries(zip(
-    formData.get('int-names').split(SEP),
-    formData.get('int-vals').split(SEP).map(val => Number(val))
-  ));
-
-  Object.assign(userVars, userSemas, userInts);
-}
-
-class Exo6 {
-
-  // static userVars = {}; // nrmlm
-  static voi1 = [];
-  static voi2 = [];
-  // ...
-
-  main() {
-    // Repeat:
-    // If there's some free place in any road, maybe/randomly create a few car instance
+  async acquire(requester) {
+    return new Promise( (resolve, reject) => {
+      this._queue.push({
+        requester,
+        resolve,
+        reject
+      });
+      this._maybeNotify();
+    });
   }
 
-  draw() {
-    drawVois();
-    drawFeu();
+  async release(_requester) {
+    this._permits++;
+    this._maybeNotify();
   }
 
-  drawVois() {
-    const {voi1, voi2} = Exo6;
-    const tousTraversees = [...voi1, ...voi2];
-    for (const traversee of tousTraversees) {
-      traversee.updateWaitVector();
+  _maybeNotify() {
+    if (this._permits > 0) {
+      const entry = this._queue.shift();
+      if (entry) {
+        this._permits--;
+        entry.resolve();
+      }
     }
-
-    voi1.sort(byVector);
-    voi2.sort(byVector);
   }
 
-  drawFeu() {
-    if (feu == 1) {
-      feu1.color = 'green';
-      feu2.color = 'red';
+}
+
+class Sim {
+
+  static userVars = {};
+  static userAlgos = {};
+
+  static chan  = null;
+  static voie1 = [];
+  static voie2 = [];
+
+  static ui = {};
+  static creatorInterval = null;
+  static drawerInterval = null;
+
+  static start() {
+    Sim.clearErrors();
+    Sim.loadUserInputs();
+    Sim.ui.$fieldset.disabled = true;
+    Sim.initCreator();
+    Sim.initDrawer();
+    // ...
+  }
+
+  static stop() {
+    clearInterval(Sim.creatorInterval);
+    clearInterval(Sim.drawerInterval);
+    Sim.ui.$fieldset.disabled = false;
+    // ...
+  }
+
+  static setup() {
+    const $ = str => document.querySelector(str);
+
+    Object.assign(Sim.ui, {
+      $form: $('form'),
+      $fieldset: $('form fieldset'),
+      $changement: $('#changement'),
+      $traversee1: $('#traversee1'),
+      $traversee2: $('#traversee2'),
+
+      $sim: $('#sim'),
+      $feu1: $('#feu1'),
+      $feu2: $('#feu2'),
+      $voie1: $('#voie1'),
+      $voie2: $('#voie2'),
+      $carrefour: $('#carrefour'),
+    })
+
+    Sim.ui.$form.onsubmit = (ev) => {
+      ev.preventDefault();
+      Sim.start();
+    }
+  }
+  
+  static loadUserInputs() {
+    const {ui} = Sim;
+
+    // userAlgos...
+    Object.assign(Sim.userAlgos,
+      {
+        changement: ui.$changement.value,
+        traversee1: ui.$traversee1.value,
+        traversee2: ui.$traversee2.value,
+      }
+    )
+
+    // userVars...
+    const fd = new FormData(ui.$form);
+    const SEP = /,\s*/; // separator
+
+    const userSemas = zipObject(
+      fd.get('sema-names').split(SEP),
+      fd.get('sema-vals').split(SEP).map(val => new Semaphore(Number(val)))
+    );
+
+    const userInts = zipObject(
+      fd.get('int-names').split(SEP),
+      fd.get('int-vals').split(SEP).map(val => Number(val))
+    );
+
+    Object.assign(Sim.userVars, userSemas, userInts);
+  }
+
+  static initCreator() {
+    Sim.chan = new Changement();
+    Sim.creatorInterval = setInterval(Sim.maybeCreateTraversee, 2 * 1000);
+  }
+
+  static initDrawer() {
+    // HACK: Redraw every 1/4 sec
+    Sim.drawerInterval = setInterval(Sim.redraw, 0.25 * 1000);
+  }
+
+  /**
+   * Maybe create a new instance of Traversee every 2 secs
+   * @todo Make voieX.push(..) part of Traversee's own logic
+   */
+  static maybeCreateTraversee() {
+    if (Math.random() < 0.5) return;
+    const {voie1, voie2} = Sim;
+    if (Math.random() < 0.5) {
+      if (voie1.length < Traversee.MAX_PAR_VOIE) {
+        voie1.push( new Traversee1() );
+      }
     } else {
-      feu2.color = 'green';
-      feu1.color = 'red';
+      if (voie2.length < Traversee.MAX_PAR_VOIE) {
+        voie2.push( new Traversee2() );
+      }
     }
+  }
+
+  static redraw() {
+    // Just update dataset and order values, and let CSS take care of the rest.
+
+    // Feu
+    Sim.ui.$sim.dataset.feu = Sim.userVars.feu;
+
+    // Voies
+    const {voie1, voie2} = Sim;
+    const tousTraversees = [...voie1, ...voie2];
+    tousTraversees.sort(Traversee.makeSorter());
+    tousTraversees.forEach((t, i) => {
+      t.$elem.title =
+`${t.color} ${t.type} #${t.id}
+
+orderVec: {${t.orderVec.join(', ')}}
+waitVec: {${t.getWaitVec().join(', ')}}`
+      t.$elem.style.order = i;
+    });
+  }
+
+  static showError(algoSource, message) {
+    Sim.ui[ '$' + algoSource ].setAttribute('title', message);
+    Sim.stop();
+    // Sim.freezeUI(); // maybe?
+  }
+
+  static clearErrors() {
+    Sim.ui.$form.querySelectorAll('[title]').forEach($x => $x.removeAttribute('title'));
   }
 
 }
 
-class Traversee {
+class Algorithme {
 
-  static freeColors = 'blue darkkhaki gray green red orange purple yellow'.split();
-  // ...
+  /**
+   * @param {String} algoSource - "changement", "traversee1", or "traversee2"
+   */
+  constructor(algoSource) {
+    this.algoSource = algoSource;
+    this.userAlgo   = Sim.userAlgos[algoSource];
+    this.orderVec   = Algorithme.parseOrderVector(this.userAlgo);
+  }
+
+  async run() {
+    const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+    try {
+      await new AsyncFunction('that', `
+      with (that) {
+        with (Sim.userVars) {
+          ${ Algorithme.awaitify(this.userAlgo) }
+        }
+      }
+      `)(this);
+    } catch (userError) {
+      console.error('userError', userError);
+      Sim.showError(this.algoSource, userError.message);
+    }
+  }
+
+  async p(x) {
+    await x.acquire(this);
+    //this.orderVec.shift(); // maybe?
+  }
+
+  async v(x) {
+    await x.release(this);
+  }
+
+  async sleep(secs) {
+    return new Promise((resolve, _reject) => {
+      setTimeout(resolve, secs * 1000);
+    });
+  }
+
+  /**
+   * Prefix "p", "v", "sleep", and "circuler" with the `await` keyword
+   * @param {string} code
+   * @returns {string}
+   */
+  static awaitify(code) {
+    return code.replace(/\b(p|v|sleep|circuler)\(/g, 'await $1(');
+  }
+
+  /**
+   * A vehicle's place in line is determined by a vector of priorities
+   * which are based on calls to p(...)
+   * 
+   * @todo Should dedup before returning?
+   * 
+   * @param {string} code
+   * @return {Array<string>}
+   */
+  static parseOrderVector(code) {
+    const pCalls = code.match(/\bp\(\s*(\w+)\s*\)/g) || [];
+    const acquiredSemaphores = pCalls.map(x => x.slice(2, -1).trim());
+    return acquiredSemaphores;
+  }
+
+}
+
+
+class Changement extends Algorithme {
 
   constructor() {
-    this.color = getUniqueColor();
-    this.waitVec = [];
+    super('changement');
+    this.run();
+    // ...
   }
 
-  updateWaitVector() {
-    this.waitVec = this.getWaitVector();
+}
+
+
+class Traversee extends Algorithme {
+
+  static MAX_PAR_VOIE = 4;
+  static count = 0;
+  static freeColors = 'blue coral darkkhaki firebrick green gray skyblue teal orange pink purple yellow'.split(' ');
+
+  constructor(algoSource) {
+    super(algoSource);
+
+    this.id = this.getUniqueId();
+    this.color = this.getUniqueColor();
+    this.type = Math.random() < 0.25 ? 'truck' : 'car'; // 25% chance of being a truck
+
+    // TODO Move to dedicated method?
+    // TODO Stop relying on .traversee1 and .traversee2 (.<algoSource>)
+    this.$elem = document.createElement('span');
+    this.$elem.classList.add('vehicle', this.type, this.algoSource);
+    this.$elem.title = `${this.color} ${this.type} #${this.id}`;
+    this.$elem.style.backgroundColor = this.color;
+    this.$elem.style.order = '9999'; // HACK needless?
   }
 
-  getWaitVector() {
-    const vec = orderVec.map(semaName => userVars[semaName].getPosition(this) );
+  async circuler() {
+    // start moving
+    await this.sleep(Math.random());
+
+    // cross the intersection then "keep moving" and fade away...
+    await this.enterIntersection();
+    await this.leaveIntersection();
+  }
+
+  async enterIntersection() {
+    Sim.ui.$carrefour.append(
+      this.$elem.parentNode.removeChild(this.$elem)
+    )
+    this.assertNoCollision();
+    await this.sleep(1);
+  }
+
+  async leaveIntersection() {
+    this.$elem.dataset.state = 'leaving';
+    await this.sleep(1);
+    this.assertNoCollision();
+    this.destroy();
+  }
+
+  assertNoCollision() {
+    const $c = Sim.ui.$carrefour;
+    const happened = $c.children.length > 1; // more than one vehicle crossing the intersection
+    if (happened) {
+      $c.dataset.state = 'collision'; // enum {'normal', 'collision'}
+      throw new Error('Collision!');
+    }
+  }
+  
+  /**
+   * @returns {Array<number>}
+   */
+  getWaitVec() {
+    const vec = this.orderVec.map(semaName => Sim.userVars[semaName].getPosition(this));
     return vec;
   }
 
+  getUniqueId() {
+    return (++Traversee.count).toString(36).toUpperCase();
+  }
+  
   getUniqueColor() {
-    return Traversee.freeColors.unshift();
+    return Traversee.freeColors.shift();
   }
 
   destroy() {
     Traversee.freeColors.push( this.color );
-    this.color = ''; // is this statement meaningless? Not even for semantic purposes?
-    // - remove from the road's list
+    this.$elem.remove();
+    
+    // TODO Move to child classes
+    // remove from the road's list
+    if (this.algoSource === 'traversee1') {
+      Sim.voie1.splice(Sim.voie1.findIndex(t => t === this), 1);
+    } else {
+      Sim.voie2.splice(Sim.voie2.findIndex(t => t === this), 1);
+    }
   }
 
+  /**
+   * Create a compare function for Traversee, with memoization support
+   * @returns {(a: Traversee, b: Traversee) => number}
+   */
+  static makeSorter() {
+    const memoizedVecs = new WeakMap();
+    
+    function getVecOf(t) {
+      if (!memoizedVecs.has(t)) {
+        memoizedVecs.set(t, t.getWaitVec());
+      }
+      return memoizedVecs.get(t);
+    }
+  
+    /**
+     * Sort wait vecs in an ascending order
+     * 
+     * @param {Array<number>} vecA 
+     * @param {Array<number>} vecB 
+     * @returns {number}
+     */
+    function compareVecs(vecA, vecB) {
+      for (let i = 0; i < vecA.length; i++) {
+        if (vecA[i] - vecB[i] !== 0) {
+          return vecA[i] - vecB[i];
+        }
+      }
+      return 0;
+    }
+  
+    function compareTraversees(a, b) {
+      return compareVecs(
+        getVecOf(a),
+        getVecOf(b)
+      )
+    }
+  
+    return compareTraversees;
+  }
+  
 }
+
 
 class Traversee1 extends Traversee {
+
   constructor() {
-    super();
-  }
-
-  // TODO: Refactor to call 'super.run()'
-  async run() {
-    with (this) {
-      eval(userAlgos.traversee1);
-    }
-    // Actually, it needs to be something more like this:
-    /*
-    const getErrorLineNum = err => Number( err.stack.match(/:(\d+):\d+$/)[1] );
-    const thisLineNum = getErrorLineNumber(new Error());
-    const evalLineNum = thisLineNum + 3;
-    try {
-      with (this) {
-        eval(userAlgos.traversee1);
-      }
-    } catch (e) {
-      const relativeLineNum = getErrorLineNum(e) - evalLineNum;
-      const relativeMessage = `${relativeLineNum}: ${e.message}`;
-      ui.$traversee1.setAttribute('title', relativeMessage);
-    }
-    */
-  }
-
-  async circuler() {
-    await moveToIntersection();
-    await moveOutIntersection();
-
-    keepMovingForward() // don't await the rest
-      .then(fadeOut)
-      .then(destory);
-  }
-
-  async p(x) {
-    if (typeof x === 'string') {
-      await userVars[x].acquire();
-    } else {
-      await x.acquire();
-    }
-    this.orderVec.unshift(); // maybe?
-  }
-
-  async v(x) {
-    if (typeof x === 'string') {
-      await userVars[x].release();
-    } else {
-      await x.release();
-    }
+    super('traversee1');
+    Sim.ui.$voie1.append(this.$elem);
+    this.run();
   }
 
 }
+
+
+class Traversee2 extends Traversee {
+
+  constructor() {
+    super('traversee2');
+    Sim.ui.$voie2.append(this.$elem);
+    this.run();
+  }
+
+}
+
+Sim.setup();
