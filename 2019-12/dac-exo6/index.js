@@ -1,7 +1,7 @@
 /**
  * @file DAC Exo6
  */
-
+//@ts-check
 /**
  * @param {Array} arrA
  * @param {Array} arrB
@@ -13,8 +13,7 @@ function zipObject(arrA, arrB) {
 }
 
 /**
- * A Promise-based and queue-based Semaphore
- * @todo maybe fork or learn from https://github.com/zeit/async-sema
+ * A basic Promise-based and queue-based Semaphore
  */
 const Semaphore = class SillySemaphore {
 
@@ -44,6 +43,18 @@ const Semaphore = class SillySemaphore {
     this._maybeNotify();
   }
 
+  /**
+   * Reject all pending promises and nullify the 'queue'
+   *   so that future calls fail...
+   */
+  die() {
+    let entry;
+    while (entry = this._queue.pop()) {
+      entry.reject();
+    }
+    this._queue = null;
+  }
+
   _maybeNotify() {
     if (this._permits > 0) {
       const entry = this._queue.shift();
@@ -55,6 +66,7 @@ const Semaphore = class SillySemaphore {
   }
 
 }
+
 
 class Sim {
 
@@ -70,19 +82,47 @@ class Sim {
   static drawerInterval = null;
 
   static start() {
+    // if (Sim.ui.$sim === undefined) Sim.resetUI();
+
     Sim.clearErrors();
     Sim.loadUserInputs();
     Sim.ui.$fieldset.disabled = true;
-    Sim.initCreator();
     Sim.initDrawer();
-    // ...
+    Sim.initCreator();
   }
 
   static stop() {
+    function freezeSimUI() {
+      // To replace all elements so no one can alter the current state
+      Sim.ui.$sim.outerHTML = Sim.ui.$sim.outerHTML;
+      // To signal that they no longer reference actual DOM elements and free them maybe(?)
+      Sim.ui = {};
+    }
+
+    function freeVariables() {
+      // Kill all user defined semaphores
+      Object.entries(Sim.userVars)
+        .map(entry => entry[1])
+        .filter(val => val instanceof Semaphore)
+        .forEach(sema => sema.die());
+
+      Sim.userVars = {};
+    }
+
+    function freeThreads() {
+      // - kill "threads" (maybe simply call .destory() of each existing Traversee)
+      // ...
+
+      // - cancel Changement 'chan' (AFAIK you can not cancel Promises...)
+      // ...
+    }
+
+    Sim.ui.$fieldset.disabled = false;
     clearInterval(Sim.creatorInterval);
     clearInterval(Sim.drawerInterval);
-    Sim.ui.$fieldset.disabled = false;
-    // ...
+    freezeSimUI();
+    //freeThreads();
+    //freeVariables();
   }
 
   static setup() {
@@ -91,6 +131,10 @@ class Sim {
     Object.assign(Sim.ui, {
       $form: $('form'),
       $fieldset: $('form fieldset'),
+      $semaNames: $('#sema-names'),
+      $semaVals: $('#sema-vals'),
+      $intNames: $('#int-names'),
+      $intVals: $('#int-vals'),
       $changement: $('#changement'),
       $traversee1: $('#traversee1'),
       $traversee2: $('#traversee2'),
@@ -107,6 +151,17 @@ class Sim {
       ev.preventDefault();
       Sim.start();
     }
+
+    $('#btn-load-attempt').onclick = (ev) => {
+      ev.preventDefault();
+      Sim.loadPreset(presets.myAttempt);
+    }
+
+    $('#btn-load-correct').onclick = (ev) => {
+      ev.preventDefault();
+      Sim.loadPreset(presets.correctAnswer);
+    }
+
   }
   
   static loadUserInputs() {
@@ -122,17 +177,16 @@ class Sim {
     )
 
     // userVars...
-    const fd = new FormData(ui.$form);
     const SEP = /,\s*/; // separator
 
     const userSemas = zipObject(
-      fd.get('sema-names').split(SEP),
-      fd.get('sema-vals').split(SEP).map(val => new Semaphore(Number(val)))
+      ui.$semaNames.value.split(SEP),
+      ui.$semaVals.value.split(SEP).map(val => new Semaphore(Number(val)))
     );
 
     const userInts = zipObject(
-      fd.get('int-names').split(SEP),
-      fd.get('int-vals').split(SEP).map(val => Number(val))
+      ui.$intNames.value.split(SEP),
+      ui.$intVals.value.split(SEP).map(val => Number(val))
     );
 
     Object.assign(Sim.userVars, userSemas, userInts);
@@ -140,6 +194,7 @@ class Sim {
 
   static initCreator() {
     Sim.chan = new Changement();
+    // maybe create a new instance of Traversee every 2 secs
     Sim.creatorInterval = setInterval(Sim.maybeCreateTraversee, 2 * 1000);
   }
 
@@ -149,41 +204,59 @@ class Sim {
   }
 
   /**
-   * Maybe create a new instance of Traversee every 2 secs
-   * @todo Make voieX.push(..) part of Traversee's own logic
+   * Maybe create a new instance of Traversee
+   * @returns {boolean} True if a new instance was created; false otherwise.
    */
   static maybeCreateTraversee() {
-    if (Math.random() < 0.5) return;
-    const {voie1, voie2} = Sim;
+    // maybe not
     if (Math.random() < 0.5) {
-      if (voie1.length < Traversee.MAX_PAR_VOIE) {
-        voie1.push( new Traversee1() );
+      return false;
+    }
+
+    if (Math.random() < 0.5) {
+      if (Sim.voie1.length < Traversee1.MAX) {
+        const t1 = new Traversee1();
+        return true;
       }
     } else {
-      if (voie2.length < Traversee.MAX_PAR_VOIE) {
-        voie2.push( new Traversee2() );
+      if (Sim.voie2.length < Traversee2.MAX) {
+        const t2 = new Traversee2();
+        return true;
       }
     }
+
+    // no room for a new 'traversee' in the randomly chosen 'voie'
+    return false;
   }
 
   static redraw() {
-    // Just update dataset and order values, and let CSS take care of the rest.
+    // Just update 'data-*' and 'order' values, and let CSS take care of the rest.
 
     // Feu
-    Sim.ui.$sim.dataset.feu = Sim.userVars.feu;
+    const {ui, chan, userVars} = Sim;
+    ui.$sim.dataset.feu = userVars.feu;
+    ui.$sim.dataset.chanQueued = chan.orderVec.some(sema => userVars[sema].getPosition(chan) > 0);
 
     // Voies
-    const {voie1, voie2} = Sim;
-    const tousTraversees = [...voie1, ...voie2];
-    tousTraversees.sort(Traversee.makeSorter());
-    tousTraversees.forEach((t, i) => {
-      t.$elem.title =
-`${t.color} ${t.type} #${t.id}
+    const {voie1, voie2, _redrawTraversee} = Sim;
+    voie1.sort(Traversee.compareTraversees);
+    voie2.sort(Traversee.compareTraversees);
+    voie1.forEach(_redrawTraversee);
+    voie2.forEach(_redrawTraversee);
+  }
 
-orderVec: {${t.orderVec.join(', ')}}
-waitVec: {${t.getWaitVec().join(', ')}}`
-      t.$elem.style.order = i;
-    });
+  /**
+   * Update Traversee
+   * 
+   * @param {Traversee} t 
+   * @param {number} i - index 
+   */
+  static _redrawTraversee(t, i) {
+    t.$elem.style.order = String(i);
+    t.$elem.title =
+      `${t.name}\n\n` +
+      `orderVec: {${t.orderVec.join(', ')}}\n` +
+      `waitVec: {${t.getWaitVec().join(', ')}}`;
   }
 
   static showError(algoSource, message) {
@@ -196,6 +269,17 @@ waitVec: {${t.getWaitVec().join(', ')}}`
     Sim.ui.$form.querySelectorAll('[title]').forEach($x => $x.removeAttribute('title'));
   }
 
+  /**
+   * Populate UI inputs with preset data
+   * 
+   * @param {object} preset
+   */
+  static loadPreset(preset) {
+    const keys = 'semaNames semaVals intNames intVals changement traversee1 traversee2'.split(' ');
+    for (const key of keys) {
+      Sim.ui['$' + key].value = preset[key];
+    }
+  }
 }
 
 class Algorithme {
@@ -213,21 +297,18 @@ class Algorithme {
     const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
     try {
       await new AsyncFunction('that', `
-      with (that) {
         with (Sim.userVars) {
-          ${ Algorithme.awaitify(this.userAlgo) }
+          ${ Algorithme.awaitifyThat(this.userAlgo) }
         }
-      }
       `)(this);
     } catch (userError) {
-      console.error('userError', userError);
+      console.error('userError', userError); // for actual debugging
       Sim.showError(this.algoSource, userError.message);
     }
   }
 
   async p(x) {
     await x.acquire(this);
-    //this.orderVec.shift(); // maybe?
   }
 
   async v(x) {
@@ -242,11 +323,13 @@ class Algorithme {
 
   /**
    * Prefix "p", "v", "sleep", and "circuler" with the `await` keyword
+   *   and attach them to the `that` object
+   * 
    * @param {string} code
    * @returns {string}
    */
-  static awaitify(code) {
-    return code.replace(/\b(p|v|sleep|circuler)\(/g, 'await $1(');
+  static awaitifyThat(code) {
+    return code.replace(/\b(p|v|sleep|circuler)\(/g, 'await that.$1(');
   }
 
   /**
@@ -280,9 +363,8 @@ class Changement extends Algorithme {
 
 class Traversee extends Algorithme {
 
-  static MAX_PAR_VOIE = 4;
   static count = 0;
-  static freeColors = 'blue coral darkkhaki firebrick green gray skyblue teal orange pink purple yellow'.split(' ');
+  static freeColors = 'blue coral darkkhaki firebrick yellowgreen gray skyblue teal orange pink purple yellow'.split(' ');
 
   constructor(algoSource) {
     super(algoSource);
@@ -290,14 +372,17 @@ class Traversee extends Algorithme {
     this.id = this.getUniqueId();
     this.color = this.getUniqueColor();
     this.type = Math.random() < 0.25 ? 'truck' : 'car'; // 25% chance of being a truck
+    this.name = `${this.color} ${this.type} #${this.id}`;
+    this.$elem = null;
+  }
 
-    // TODO Move to dedicated method?
-    // TODO Stop relying on .traversee1 and .traversee2 (.<algoSource>)
+  initElem() {
     this.$elem = document.createElement('span');
-    this.$elem.classList.add('vehicle', this.type, this.algoSource);
-    this.$elem.title = `${this.color} ${this.type} #${this.id}`;
+    this.$elem.classList.add('vehicle', this.type);
+    this.$elem.dataset.direction = this.algoSource === 'traversee1' ? 'down' : 'left';
     this.$elem.style.backgroundColor = this.color;
-    this.$elem.style.order = '9999'; // HACK needless?
+    this.$elem.title = this.name; // (will be updated)
+    this.$elem.style.order = '9999'; // HACK needless? (will be updated)
   }
 
   async circuler() {
@@ -352,54 +437,32 @@ class Traversee extends Algorithme {
   destroy() {
     Traversee.freeColors.push( this.color );
     this.$elem.remove();
-    
-    // TODO Move to child classes
-    // remove from the road's list
-    if (this.algoSource === 'traversee1') {
-      Sim.voie1.splice(Sim.voie1.findIndex(t => t === this), 1);
-    } else {
-      Sim.voie2.splice(Sim.voie2.findIndex(t => t === this), 1);
-    }
   }
 
   /**
-   * Create a compare function for Traversee, with memoization support
-   * @returns {(a: Traversee, b: Traversee) => number}
+   * 
+   * @param {Traversee} a 
+   * @param {Traversee} b 
+   * @returns {number}
    */
-  static makeSorter() {
-    const memoizedVecs = new WeakMap();
-    
-    function getVecOf(t) {
-      if (!memoizedVecs.has(t)) {
-        memoizedVecs.set(t, t.getWaitVec());
+  static compareTraversees(a, b) {
+    return Traversee._compareVecs( a.getWaitVec(), b.getWaitVec() );
+  }
+
+  /**
+   * Sort wait vecs in an ascending order
+   * 
+   * @param {Array<number>} vecA
+   * @param {Array<number>} vecB
+   * @returns {number}
+   */
+  static _compareVecs(vecA, vecB) {
+    for (let i = 0; i < vecA.length; i++) {
+      if (vecA[i] - vecB[i] !== 0) {
+        return vecA[i] - vecB[i];
       }
-      return memoizedVecs.get(t);
     }
-  
-    /**
-     * Sort wait vecs in an ascending order
-     * 
-     * @param {Array<number>} vecA 
-     * @param {Array<number>} vecB 
-     * @returns {number}
-     */
-    function compareVecs(vecA, vecB) {
-      for (let i = 0; i < vecA.length; i++) {
-        if (vecA[i] - vecB[i] !== 0) {
-          return vecA[i] - vecB[i];
-        }
-      }
-      return 0;
-    }
-  
-    function compareTraversees(a, b) {
-      return compareVecs(
-        getVecOf(a),
-        getVecOf(b)
-      )
-    }
-  
-    return compareTraversees;
+    return 0;
   }
   
 }
@@ -407,10 +470,23 @@ class Traversee extends Algorithme {
 
 class Traversee1 extends Traversee {
 
+  static MAX = 4;
+
   constructor() {
     super('traversee1');
+    this.init();
+  }
+
+  init() {
+    this.initElem();
     Sim.ui.$voie1.append(this.$elem);
+    Sim.voie1.push(this);
     this.run();
+  }
+
+  destroy() {
+    super.destroy();
+    Sim.voie1.splice(Sim.voie1.findIndex(t => t === this), 1);
   }
 
 }
@@ -418,12 +494,26 @@ class Traversee1 extends Traversee {
 
 class Traversee2 extends Traversee {
 
+  static MAX = 7;
+
   constructor() {
     super('traversee2');
+    this.init();
+  }
+
+  init() {
+    this.initElem();
     Sim.ui.$voie2.append(this.$elem);
+    Sim.voie2.push(this);
     this.run();
+  }
+  
+  destroy() {
+    super.destroy();
+    Sim.voie2.splice(Sim.voie2.findIndex(t => t === this), 1);
   }
 
 }
+
 
 Sim.setup();

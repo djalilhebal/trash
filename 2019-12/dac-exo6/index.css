@@ -8,8 +8,18 @@ body {
   text-align: center;
 }
 
+a {
+  text-decoration: none;
+  color: seagreen;
+}
+a:hover {
+  text-decoration: underline;
+}
+
 code {
-  font-style: italic;
+  background: gray;
+  color: white;
+  padding: 1px 2px;
 }
 
 /********************************/
@@ -42,6 +52,10 @@ table {
   border: 0;
   border-bottom: 2px dashed black;
   outline: none;
+  min-width: 250px;
+}
+#user-vars input:focus {
+  border-color: darkblue;
 }
 
 textarea {
@@ -82,32 +96,37 @@ textarea[title] {
   display: inline-block;
   position: absolute !important;
   border-radius: 50%;
+  border: 3px solid transparent;
 }
+
+#sim[data-chan-queued="true"] #feu1, #sim[data-chan-queued="true"] #feu2 {
+  border-color: yellow;
+}
+
 #sim[data-feu="0"] #feu1, #sim[data-feu="0"] #feu2 {
   background-color: gray !important;
 }
 #sim[data-feu="1"] #feu1 {
   background-image: url(images/traffic-lights-green.svg);
-  background-color: yellowgreen;
+  background-color: green;
 }
 #sim[data-feu="2"] #feu2 {
   background-image: url(images/traffic-lights-green.svg);
-  background-color: yellowgreen;
+  background-color: green;
 }
 
 #feu1 {
   margin-top: 75px;
-  margin-left: -195px;
+  margin-left: -200px;
 }
-
 #feu2 {
-  margin-top: 75px;
+  margin-top: 70px;
 }
 
 #voie1, #voie2 {
   background: white;
-  padding: 5px;
   display: flex;
+  padding: 5px;
   z-index: 1;
 }
 
@@ -131,8 +150,8 @@ textarea[title] {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  place-items: center center;
   display: grid;
+  place-items: center center;
   top: 210px;
   left: 158px;
   z-index: 2;
@@ -142,8 +161,8 @@ textarea[title] {
 }
 
 .vehicle {
-  width: 48px;
-  height: 48px;
+  width: 45px;
+  height: 45px;
   display: inline-block;
   background-color: black;
   background-repeat: no-repeat;
@@ -155,31 +174,31 @@ textarea[title] {
 .car { background-image: url(images/city-car.svg); }
 .truck { background-image: url(images/truck.svg); }
 
-.traversee1 { transform: rotateZ(90deg); }
-.traversee2 { transform: rotateY(180deg); }
-
-.traversee2 {
-  transform: rotateY(180deg);
-}
+.vehicle[data-direction="down"] { transform: rotateZ(90deg); }
+.vehicle[data-direction="left"] { transform: rotateY(180deg); }
 
 #carrefour[data-state="normal"] .vehicle[data-state="leaving"] {
   opacity: 0;
 }
-#carrefour[data-state="normal"] .traversee1[data-state="leaving"] {
+#carrefour[data-state="normal"] .vehicle[data-state="leaving"][data-direction="down"] {
   margin-bottom: -150px;
 }
-#carrefour[data-state="normal"] .traversee2[data-state="leaving"] {
+#carrefour[data-state="normal"] .vehicle[data-state="leaving"][data-direction="left"] {
   margin-left: -150px;
 }
 
 /********************************/
 
-section {
-  background: lightgray;
+section, footer {
+  background: gainsboro;
   text-align: left;
-  margin: 5px;
+  margin: 10px;
   padding: 10px;
 }
 section pre {
   white-space: pre-line;
+}
+
+footer {
+  text-align: center;
 }
