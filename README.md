@@ -14,7 +14,7 @@ Like a collection of my *trashy tries*(?)
 
 - Daffy Darja [`wilaya-input-draft.html`](https://dreamski21.github.io/trash/2019-05/wilaya-input-draft.html) and [`user-profile-draft.html`](https://dreamski21.github.io/trash/2019-05/wilaya-input-draft.html) (2019-05)
 
-- [Sogral--](https://dreamski21.github.io/trash/2019-07/sogral--/index.html#depart=12&dest=18) (2019-07): A scraper and bus timetables for Sogral-managed voyages(?) _#Ramda #FP_
+- [Sogral--](https://dreamski21.github.io/trash/2019-07/sogral--/index.html#depart=12&dest=18) (2019-07): A scraper and bus timetables for Sogral-managed voyages(?) _#FunctionalProgramming #Ramda_
 
 - `power-panic.sh` (2019-08): A one-liner that makes the laptop sleep when disconnected from the power supply.
 
@@ -22,9 +22,9 @@ Like a collection of my *trashy tries*(?)
 
 - [`business-card-back`](https://dreamski21.github.io/trash/2019-12/business-card-back) (2019-12): The backside of my trashy "business card". _#QRCode_
 
-- [DAC Exo3](https://dreamski21.github.io/trash/2019-11/dac-exo3/?scenario=p1,p2,p3) (2019-11): _#Semaphore #Viz_
+- [DAC Exo3](https://dreamski21.github.io/trash/2019-11/dac-exo3/?scenario=p1,p2,p3) (2019-11): _#ConcurrentProgramming #Semaphore #Viz_
 
-- [ ] [DAC Exo6](https://dreamski21.github.io/trash/2019-12/dac-exo6/) (2019-12): _#Semaphore #Animation #Phaser_
+- [DAC Exo6](https://dreamski21.github.io/trash/2019-12/dac-exo6/) (2019-12): _#ConcurrentProgramming #Semaphore #Simulation_
 
 ## Ideas expressed in code
 - `Romyo.rb` (2019-03): AI/chatbot that communicates in Darja but thinks in English. A *Daffy Darja* use-case.
@@ -38,4 +38,4 @@ Like a collection of my *trashy tries*(?)
 - `AsocialCCP.ts` (2019-10): An e-payment system based on SMS and CCP ("postal money transfer") to overcome some of Algeria's annoying e-commerce issues.
 
 ## License
-WTFPL
+WTFPL unless otherwise stated
