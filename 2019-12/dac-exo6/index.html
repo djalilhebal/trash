@@ -10,22 +10,24 @@
 <body>
   <header>
     <h1>DAC Exo6: La Circulation</h1>
-    <p class="subtitle">#Simulation #Animation #prototype</p>
+    <p class="subtitle">#ConcurrentProgramming #Simulation #prototype</p>
   </header>
   <main>
     <form autocomplete="off" spellcheck="false">
       <fieldset>
 
         <div id="user-vars">
-          <b>Sémaphores</b>
-            {<input name="sema-names" type="text" value="sFeu1, sFeu2, sVide1, sVide2" />}
+          <b>Globally defined variables</b><br />
+
+          <b>Semaphores</b>
+            {<input id="sema-names" type="text" value="sFeu1, sFeu2, sVide1, sVide2" />}
             =
-            {<input name="sema-vals" type="text" value="1, 0, 1, 1" />}
+            {<input id="sema-vals" type="text" value="1, 0, 1, 1" />}
           <br />
-          <b>Entiers</b>
-            {<input name=int-names type="text" value="feu" />}
+          <b>Integers</b>
+            {<input id=int-names type="text" value="feu" />}
             =
-            {<input name="int-vals" type="text" value="1" />}
+            {<input id="int-vals" type="text" value="1" />}
         </div>
 
         <table>
@@ -69,14 +71,14 @@ v(sVide2)</textarea>
         <div id="buttons">
           <input id="btn-start" type="submit" value="Start!" />
           <button id="btn-stop" disabled>Stop</button>
-          <button id="btn-load-attempt" disabled>Load my attempt</button>
-          <button id="btn-load-correct" disabled>Load correct solution</button>
+          <button id="btn-load-attempt">Load my attempt</button>
+          <button id="btn-load-correct">Load correct solution</button>
         </div>
 
       </fieldset>
     </form>
 
-    <div id="sim" data-feu="0">
+    <div id="sim" role="img" data-feu="0" data-chan-queued="false">
       <span id="feu1" title="feu == 1"></span>
       <div id="voie1" title="voie 1"></div>
 
@@ -89,19 +91,18 @@ v(sVide2)</textarea>
   </main>
 
   <section>
-    <h2>Ideas...</h2>
+    <h2>Notes</h2>
     <pre>
-    - TODO: Force user to declare 'feu' as `enum {1, 2}` (see the Problem section).
+    - You must declare <code>feu</code> as <code>{1, 2}</code> (see the Problem section).
+
+    - Warning: The 'stop' and 'restart' functionalities are not fully implemented and so you will need to refresh the page to test a different solution (TO BE FIXED later maybe~)
 
     - Warning: Because the whole system is based on Promises and not actual threads, you will need to use <code>sleep(0)</code> if you're going to use an "active wait" loop of some kind.
-    (for an example, see the code of <a href="./presets.js">my attempt</a>)
+    (for an example, see the code of 'my attempt')
 
-    - Warning: Keep this in mind: Sorting each road's cars with multiple dynamic queues (Semaphores) is tricky:
+    - Keep this in mind if using loops and conditionals: Sorting each road's vehicles with multiple dynamic queues (Semaphores) is tricky:
     The ordering priority I used depends on calls to p(...)
-    like 'p(sFeu); p(sVide); ...' creates `orderVec=['sFeu', 'sVide']` that will be used to sort each vehicle.
-
-    - TODO: Draw using <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element/svg">SVG</a> and animate using <a href="https://svgjs.com/">SVG.js</a>.
-    - TODO: Maybe use the Phaser game engine for collision detection and animation.
+    like <code>p(sFeu); p(sVide);</code> creates <code>orderVec=['sFeu', 'sVide']</code> that will be used to sort each vehicle.
   </pre>
   </section>
 
@@ -112,7 +113,7 @@ v(sVide2)</textarea>
 
 
     <b>Traffic Lights:</b>
-    At an intersection, traffic is controlled/<i>minajjed</i> by traffic lights.
+    At an intersection, traffic is controlled by traffic lights...
 
     Rules:
     - The intersection can contain at most one vehicle.
@@ -127,7 +128,8 @@ v(sVide2)</textarea>
     This system can be modeled as a set of parallel processes:
     - A process <b>P</b> that executes the Changement procedure which handles both traffic lights.
     - A process for each vehicle (Traversee<sub>i</sub> if on voie<sub>i</sub>; where i = {1, 2})
-    - Traffic light of voie<sub>i</sub> is green if <code>feu == i</code>.
+    - Traffic light of voie<sub>i</sub> is green when <code>feu == i</code>.
+    (Hint: Traffic lights display a yellow circle when 'Changement' is waiting on a semaphore)
 
     Write <b>Changement</b>, as well as the <b>Traversee1</b> and <b>Traversee2</b> procedures to synchronize the system using semaphores.
 
@@ -136,9 +138,9 @@ v(sVide2)</textarea>
   </section>
   
   <section>
-    <h2>Notes</h2>
+    <h2>More Notes</h2>
     <pre>
-    This web app is supposed be <em>useful</em> (as in [2]) to students, so they can actually test their procedures and learn how they work in a dynamic system
+    This web app is supposed be <em>useful</em> (as in [2]) to students, so they can actually test their algorithms and see how they work in a dynamic system,
     and not just a viz like I did with <a href="https://dreamski21.github.io/trash/2019-11/dac-exo3/?scenario=p1,p2,p3">DAC Exo3</a>.
     
     * Why? Why not. Also, because the idea of simulating a dynamic system sounded cool (my DAC teacher mentioned it).
@@ -157,30 +159,38 @@ v(sVide2)</textarea>
   <section>
     <h2>Credits</h2>
     <pre>
-    - {City car, Truck, Traffic lights green, Traffic lights red} icon by <a href="http://delapouite.com">Delapouite</a> under CC BY 3.0
+    - 'City car', 'Truck', 'Traffic lights green', and 'Traffic lights red' icons by <a href="http://delapouite.com">Delapouite</a> under CC BY 3.0
     </pre>
+    - <a href="https://github.com/zeit">@ZEIT</a>'s <code>async-sema</code> package (under the MIT license) heavily inspired my SillySemaphore
   </section>
   
   <section>
     <h2>Refs</h2>
     These are some of the cool documents and topics I checked while making this...<br />
     <pre>
-    - [1]: Shene, <i>ThreadMentor: A Pedagogical Tool for Multithreaded Programming</i> (<a href="https://pages.mtu.edu/~shene/NSF-3/e-Book/index.html">tutorial</a>)
+    - [1]: Steve Carr and Jean Mayo and Ching-kuang Shene, <i>ThreadMentor: A Pedagogical Tool for Multithreaded Programming</i> (<a href="https://pages.mtu.edu/~shene/NSF-3/e-Book/index.html">tutorial</a>)
     - [2]: B. P. Miller, <i>What to Draw? When to Draw? An Essay on Parallel Program Visualization</i>
 
     - Wikipedia, <i>Queueing theory</i>
-    - Wikipedia, <a href="https://en.wikipedia.org/wiki/Taxicab_geometry">Taxicab geometry</a>
+
+    - Wikipedia, <i>Taxicab geometry</i>
 
     - Wikipedia, <i>Computer simulation</i>
     - Wikipedia, <i>Web-based simulation</i>
     - Wikipedia, <i>Discrete-event simulation</i>
-    - SIM.JS <a href="https://en.wikipedia.org/wiki/SIM.JS">on Wikipedia</a>, <a hred="http://simjs.com/index.html">its website</a>
+    - SIM.JS: <a href="https://en.wikipedia.org/wiki/SIM.JS">on Wikipedia</a>, <a href="http://simjs.com/index.html">its website</a>
 
     - <a href="http://bit-player.org/2015/traffic-jams-in-javascript">Traffic Jams in Javascript | bit-player</a>
+
     - <a href="https://www.ted.com/talks/wanis_kabbaj_what_a_driverless_world_could_look_like">Wanis Kabbaj: What a driverless world could look like | TED Talk</a>
     </pre>
   </section>
 
+  <footer>
+    By <a href="https://twitter.com/dreamski21">@dreamski21</a>, under CC BY 3.0, <a href="https://github.com/dreamski21/trash">source code available on GitHub</a>
+  </footer>
+
+  <script src="presets.js"></script>
   <script src="index.js"></script>
 </body>
 </html>
