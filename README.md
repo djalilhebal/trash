@@ -33,7 +33,7 @@ Like a collection of my *trashy tries*(?)
 
 - `Masmo.js` (2019-04): Web-based, 16-bit MASM IDE.
 
-- `skill-dollhouse.py` (2019-06): A *Skill* for @MycroftAI to control USBKill via voice commands.
+- `skill-dollhouse.py` (2019-06): A *Skill* for @MycroftAI to control USBKill via voice commands. Inspired by Joss Whedon's [Dollhouse series](https://www.imdb.com/title/tt1135300/).
 
 - `shallow-doxxer--tech-spec-v0.rst` (2019-06): A trashy tech spec for Shallow Doxxer.
 
