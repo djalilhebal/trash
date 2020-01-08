@@ -1,0 +1,28 @@
+Re-writing my old sqrt function in AssemblyScript
+
+Why?
+=====
+Having learned a bit of assembly language (MASM) in my second year's Computer Architecture course,
+and out of curiosity, I wanted to check WASM and do something with it.
+... And maybe to prove a point to some students that the shit we're studying is actually important.
+
+Files
+======
+- `sqrt.ts` is basically the same as `sqrt.js` but with comments and explicit types
+- `sqrt.as.ts` is `sqrt.ts` ported to AssemblyScript
+- `sqrt.untouched.excerpt.wat` is my non-optimized compiled code in the WebAssembly text format
+- `sqrt.optimized.excerpt.wat` is my optimized compiled code in the WebAssembly text format
+
+Link
+=====
+- My old sqrt script: https://github.com/dreamski21/shit/blob/master/2017-12/Dreamski.sqrt.js
+- My AO (Computer Architecture) stuff: https://github.com/dreamski21/shit/tree/master/2018-11
+
+- WebAssembly: https://developer.mozilla.org/en-US/docs/WebAssembly
+- WebAssembly text format: https://developer.mozilla.org/en-US/docs/WebAssembly/Understanding_the_text_format
+- AssemblyScript: https://github.com/AssemblyScript/assemblyscript
+
+- Interesting stuff I haven't tried yet:
+  * https://github.com/wasdk/WebAssemblyStudio
+  * https://github.com/wasmerio/wasmer
+  * https://github.com/WAVM/WAVM

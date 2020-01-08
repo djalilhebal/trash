@@ -24,7 +24,7 @@ Like a collection of my *trashy tries*(?)
 
 - [DAC Exo3](https://dreamski21.github.io/trash/2019-11/dac-exo3/?scenario=p1,p2,p3) (2019-11): _#ConcurrentProgramming #Semaphore #Viz_
 
-- [DAC Exo6](https://dreamski21.github.io/trash/2019-12/dac-exo6/) (2019-12): _#ConcurrentProgramming #Semaphore #Simulation_
+- `sqrt.ts` (2019-12) my old *sqrt* function rewritten in TypeScript / AssemblyScript / WebAssembly
 
 ## Ideas expressed in code
 - `Romyo.rb` (2019-03): AI/chatbot that communicates in Darja but thinks in English. A *Daffy Darja* use-case.
