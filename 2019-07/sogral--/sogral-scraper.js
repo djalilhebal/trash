@@ -235,7 +235,7 @@ function denormalizeData(sogralData) {
 // fetchData :: () -> Object
 const fetchData = R.pipeP(fetchDeparts, fetchDests, fetchVoyages);
 
-// jsonift :: Object -> String
+// jsonify :: Object -> String
 const jsonify = R.curryN(3, JSON.stringify)(R.__, null, 2);
 
 /* SIDE EFFECT! */

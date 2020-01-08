@@ -6,11 +6,11 @@ Problem & Idea
 My friends Light and Kokichi described to me the process by which they buy stuff online:
 1) Find some junk you wanna buy
 2) Contact a dealer on Facebook or by phone to agree on the purchase
-3) Pay via CCP
+3) Pay via CCP at the post office
 4) Inform the dealer and maybe provide proof (like a photo of the receipt or idk)
-5) Finally, the dealer fulfills your request.
+5) Finally, the dealer fulfills your request
 
-Steps 2) to 5) can and should be automated to get rid of the tedious and unnecessary human interactions... XD
+Steps 2) to 5) can and should be automated to get rid of the tedious and unnecessary human interactions~ XD
 
 Though there seems to be no straightforward way to accomplish this, we can still use what's available
 to implement a general purpose, CCP-based, e-payment platform/app.
@@ -21,7 +21,7 @@ contains the exact amount of the transaction.
 We can use this 'exact amount' as a key in our key-value 'Requests' database.
 When we receive the key (i.e. payment), we know whom it belongs to, and we carry out the order.
 
-The app must have a reactive user interface (think Meteor) so that users can know the status of their requests.
+The app must have a reactive user interface (think Meteor) so that users know the status of their requests.
 
 Aaaand life's good.
 
@@ -50,6 +50,13 @@ That's a valid point.
 Just saying: In the worst case scenario, you'll be paying an extra 198 DZD because of how
 this system works (501 -> 600 -> 699).
 So maybe instead of rounding up, I should just round *down* or to the nearest hundred?
+
+But in my defense, it's the only way to make the system work with what little information I have.
+Also, it should be considered fair enough as cryptocurrencies use a similar approach:
+  "The amount of gas you would pay for that depends on how many other transactions have called that
+  function before your transaction is included in a block."
+  -- Mastering Ethereum by Andreas M. Antonopoulos and Gavin Wood (https://github.com/ethereumbook/)
+Either wait for less traffic (read: free slots with low codes) or pay what's required now. *shrugs*
 
 - What happens to those extra dinars?
   - Think of them as processing fees.
