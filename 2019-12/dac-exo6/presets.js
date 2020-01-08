@@ -20,7 +20,6 @@ changement:
 
 traversee1:
 `while (true) {
-  sleep(0)//needed
   p(sFeu)
   if (feu == 1) {
     p(sVide)
@@ -34,7 +33,6 @@ traversee1:
 
 traversee2:
 `while (true) {
-  sleep(0)//needed
   p(sFeu)
   if (feu == 2) {
     p(sVide)

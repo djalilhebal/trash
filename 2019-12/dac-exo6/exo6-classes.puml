@@ -1,5 +1,7 @@
 @startuml Exo6
 
+skinparam classAttributeIconSize 0
+
 class Sim {
   # {static} userVars: Map<String, number | Semaphore>
   # {static} userAlgos: Map<String, String>
@@ -23,26 +25,23 @@ class Algorithme {
   + v(x: Semaphore)
   + sleep(secs: number)
 
-  - run()
-  - {static} awaitify(code: String): String
-  - {static} parseOrderVector(code: String): Array<String>
+  - run(): void
   ~ getWaitVec(): Array<number>
+  - {static} awaitifyThat(code: String): String
+  - {static} parseOrderVector(code: String): Array<String>
 }
 
 
-class Changement {
-
-}
+class Changement {}
 
 class Traversee {
+  # name: string
   - color: String
   - type: String
-  - id: String
   
   + circuler()
   - assertNoCollision()
   - destroy()
-  - getUniqueColor(): String
 }
 class Traversee1 {}
 class Traversee2 {}
@@ -51,9 +50,10 @@ class SillySemaphore {
   - permits: number
   - queue: Array<Object>
   
-  + acquire(): Promise
-  + release(): Promise
-  + getPosition(requester: Object): number
+  + acquire(acquirer: Object): Promise<void>
+  + release(acquirer: Object): Promise<void>
+  + getPosition(acquirer: Object): number
+  + die(): void
 }
 
 Sim *--right Algorithme
@@ -62,4 +62,5 @@ Algorithme <|-- Changement
 Algorithme <|-- Traversee
 Traversee <|-- Traversee1
 Traversee <|-- Traversee2
+
 @enduml

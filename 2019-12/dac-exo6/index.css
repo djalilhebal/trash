@@ -61,6 +61,7 @@ table {
 textarea {
   color: darkblue;
   height: 150px;
+  width: 200px;
   outline: none;
   padding: 3px;
 }
@@ -195,6 +196,7 @@ section, footer {
   margin: 10px;
   padding: 10px;
 }
+
 section pre {
   white-space: pre-line;
 }

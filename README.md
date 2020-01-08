@@ -22,7 +22,7 @@ Like a collection of my *trashy tries*(?)
 
 - [`business-card-back`](https://dreamski21.github.io/trash/2019-12/business-card-back) (2019-12): The backside of my trashy "business card". _#QRCode_
 
-- [DAC Exo3](https://dreamski21.github.io/trash/2019-11/dac-exo3/?scenario=p1,p2,p3) (2019-11): _#ConcurrentProgramming #Semaphore #Viz_
+- [DAC Exo6: La Circulation](https://dreamski21.github.io/trash/2019-12/dac-exo6/) (2019-12): _#ConcurrentProgramming #Simulation #Semaphore #Promises_
 
 - `sqrt.ts` (2019-12) my old *sqrt* function rewritten in TypeScript / AssemblyScript / WebAssembly
 

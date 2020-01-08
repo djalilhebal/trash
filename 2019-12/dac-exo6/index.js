@@ -1,7 +1,7 @@
 /**
  * @file DAC Exo6
  */
-//@ts-check
+
 /**
  * @param {Array} arrA
  * @param {Array} arrB
@@ -22,15 +22,15 @@ const Semaphore = class SillySemaphore {
     this._queue = [];
   }
 
-  getPosition(requester) {
-    const idx = this._queue.findIndex(entry => entry.requester === requester);
+  getPosition(acquirer) {
+    const idx = this._queue.findIndex(entry => entry.acquirer === acquirer);
     return idx + 1; // to get rid of '-1'
   }
 
-  async acquire(requester) {
+  async acquire(acquirer) {
     return new Promise( (resolve, reject) => {
       this._queue.push({
-        requester,
+        acquirer,
         resolve,
         reject
       });
@@ -38,7 +38,7 @@ const Semaphore = class SillySemaphore {
     });
   }
 
-  async release(_requester) {
+  async release(_acquirer) {
     this._permits++;
     this._maybeNotify();
   }
@@ -200,6 +200,7 @@ class Sim {
 
   static initDrawer() {
     // HACK: Redraw every 1/4 sec
+    // XXX: Maybe use Proxy(userVars) and redraw after its attributes are accessed..
     Sim.drawerInterval = setInterval(Sim.redraw, 0.25 * 1000);
   }
 
@@ -308,10 +309,12 @@ class Algorithme {
   }
 
   async p(x) {
+    await this.sleep(0);
     await x.acquire(this);
   }
 
   async v(x) {
+    await this.sleep(0);
     await x.release(this);
   }
 
