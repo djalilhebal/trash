@@ -1,5 +1,5 @@
 /**
- * @file DAC Exo6
+ * @file DAC Exo6: La Circulation
  */
 
 /**
@@ -79,7 +79,6 @@ class Sim {
 
   static ui = {};
   static creatorInterval = null;
-  static drawerInterval = null;
 
   static start() {
     // if (Sim.ui.$sim === undefined) Sim.resetUI();
@@ -87,8 +86,8 @@ class Sim {
     Sim.clearErrors();
     Sim.loadUserInputs();
     Sim.ui.$fieldset.disabled = true;
-    Sim.initDrawer();
     Sim.initCreator();
+    Sim.redraw();
   }
 
   static stop() {
@@ -119,7 +118,6 @@ class Sim {
 
     Sim.ui.$fieldset.disabled = false;
     clearInterval(Sim.creatorInterval);
-    clearInterval(Sim.drawerInterval);
     freezeSimUI();
     //freeThreads();
     //freeVariables();
@@ -198,12 +196,6 @@ class Sim {
     Sim.creatorInterval = setInterval(Sim.maybeCreateTraversee, 2 * 1000);
   }
 
-  static initDrawer() {
-    // HACK: Redraw every 1/4 sec
-    // XXX: Maybe use Proxy(userVars) and redraw after its attributes are accessed..
-    Sim.drawerInterval = setInterval(Sim.redraw, 0.25 * 1000);
-  }
-
   /**
    * Maybe create a new instance of Traversee
    * @returns {boolean} True if a new instance was created; false otherwise.
@@ -239,11 +231,15 @@ class Sim {
     ui.$sim.dataset.chanQueued = chan.orderVec.some(sema => userVars[sema].getPosition(chan) > 0);
 
     // Voies
-    const {voie1, voie2, _redrawTraversee} = Sim;
+    const {voie1, voie2, redrawTraversee} = Sim;
     voie1.sort(Traversee.compareTraversees);
     voie2.sort(Traversee.compareTraversees);
-    voie1.forEach(_redrawTraversee);
-    voie2.forEach(_redrawTraversee);
+    voie1.forEach(redrawTraversee);
+    voie2.forEach(redrawTraversee);
+
+    // XXX: Maybe it's better to use Proxy(userVars) and redraw after its attributes are accessed..
+    // Redraw before each repaint
+    requestAnimationFrame(Sim.redraw);
   }
 
   /**
@@ -252,7 +248,7 @@ class Sim {
    * @param {Traversee} t 
    * @param {number} i - index 
    */
-  static _redrawTraversee(t, i) {
+  static redrawTraversee(t, i) {
     t.$elem.style.order = String(i);
     t.$elem.title =
       `${t.name}\n\n` +
@@ -263,7 +259,6 @@ class Sim {
   static showError(algoSource, message) {
     Sim.ui[ '$' + algoSource ].setAttribute('title', message);
     Sim.stop();
-    // Sim.freezeUI(); // maybe?
   }
 
   static clearErrors() {
@@ -391,7 +386,6 @@ class Traversee extends Algorithme {
   async circuler() {
     // start moving
     await this.sleep(Math.random());
-
     // cross the intersection then "keep moving" and fade away...
     await this.enterIntersection();
     await this.leaveIntersection();
@@ -449,7 +443,7 @@ class Traversee extends Algorithme {
    * @returns {number}
    */
   static compareTraversees(a, b) {
-    return Traversee._compareVecs( a.getWaitVec(), b.getWaitVec() );
+    return Traversee.compareVecs( a.getWaitVec(), b.getWaitVec() );
   }
 
   /**
@@ -459,7 +453,7 @@ class Traversee extends Algorithme {
    * @param {Array<number>} vecB
    * @returns {number}
    */
-  static _compareVecs(vecA, vecB) {
+  static compareVecs(vecA, vecB) {
     for (let i = 0; i < vecA.length; i++) {
       if (vecA[i] - vecB[i] !== 0) {
         return vecA[i] - vecB[i];
@@ -517,6 +511,5 @@ class Traversee2 extends Traversee {
   }
 
 }
-
 
 Sim.setup();
