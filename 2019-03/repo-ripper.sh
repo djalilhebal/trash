@@ -3,8 +3,8 @@ echo "Usage: repo-ripper.sh USERNAME [--include-forks | --starred]"
 echo "Downloads/Rips all of USERNAME's repos from GitHub or keeps them updated"
 echo "Example 1: repo-ripper.sh linuxscout"
 echo "downloads/updates all of Taha's repos to/in './ripped-repos/@linuxscout/'"
-echo "Example 2: repo-ripper.sh dreamski21 --starred"
-echo "downloads/updates repos that are starred by dreamski21 to/in their owners' folders"
+echo "Example 2: repo-ripper.sh djalilhebal --starred"
+echo "downloads/updates repos that are starred by djalilhebal to/in their owners' folders"
 echo
 # Since I hardly have Internet access, I needed to write a script to download
 #  stuff from interesting people like @linuxscout, @ncase, and @getify. [WIP]

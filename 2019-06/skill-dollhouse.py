@@ -11,13 +11,13 @@ This Skill uses the same de/activation phrases to start/stop a "killer process" 
 watches USB ports and "kills" (i.e. locks, wipes, then shuts down) the PC when an
 unauthorized device is connected.
 - More information about usbkill: https://github.com/hephaest0s/usbkill
-- My previous idea: USBKiss.js in https://github.com/dreamski21/shit
+- My previous idea: USBKiss.js in https://github.com/djalilhebal/shit
 
 NOTE: Just suppose there's a decorator @intent_verbatim_handler(text) which is basically
 the same as @intent_file_handler("x.intent") where x.intent contains that `text`.
 
 ## Credits
-Djalil Dreamski (@dreamski21)
+Djalil Dreamski (@djalilhebal)
 
 ## Category
 **Security**

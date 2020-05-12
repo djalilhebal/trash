@@ -1,6 +1,6 @@
 /**
  * @file AssemblyScript version of my sqrt function
- * @author Djalil Dreamski (@dreamski21)
+ * @author Djalil Dreamski (@djalilhebal)
  * @date Dec. 2019
  */
 

@@ -19,7 +19,7 @@
  * So here's the DISCLAIMER: It's written for educational purposes and obviously not for profit :p
  * 
  * **AO: Architecture des ordinateurs (lit. Computer architecture)
- * [RetardedAO]: https://github.com/dreamski21/shit/tree/master/2018-11
+ * [RetardedAO]: https://github.com/djalilhebal/shit/tree/master/2018-11
  * [Ace]: https://github.com/ajaxorg/ace
  * [V86]: https://github.com/copy/v86
  * [FreeDOS]: https://www.freedos.org
@@ -45,7 +45,7 @@ class Masmo {
     // Suppose Ace's scripts and styles were loaded using <script>s and <link>s
     const editor = ace.edit('editor');
     editor.setTheme('ace/theme/vibrant_ink'); // or "ace/theme/chaos"
-    editor.session.setMode('dreamski21/mode/masm');
+    editor.session.setMode('djalilhebal/mode/masm');
     editor.session.doc.on('change', this.updateAnnotations);
     editor.setValue(Masmo.EXAMPLE);
     this.editor = editor;
